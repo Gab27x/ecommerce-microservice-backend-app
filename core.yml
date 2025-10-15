@@ -35,3 +35,4 @@ services:
 networks:
   microservices_network:
     driver: bridge
+    name: microservices_network 

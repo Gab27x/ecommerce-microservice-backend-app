@@ -1,6 +1,7 @@
 services:
   api-gateway-container:
     image: selimhorri/api-gateway-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8080:8080"
     networks:
@@ -13,12 +14,10 @@ services:
       - EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT=myzone
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
 
   proxy-client-container:
     image: selimhorri/proxy-client-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8900:8900"
     networks:
@@ -31,12 +30,10 @@ services:
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
-      
+
   order-service-container:
     image: selimhorri/order-service-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8300:8300"
     networks:
@@ -49,12 +46,10 @@ services:
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
 
   payment-service-container:
     image: selimhorri/payment-service-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8400:8400"
     networks:
@@ -67,12 +62,10 @@ services:
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
 
   product-service-container:
     image: selimhorri/product-service-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8500:8500"
     networks:
@@ -85,12 +78,10 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_ZIPKIN_BASE-URL=http://zipkin:9411
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
 
   shipping-service-container:
     image: selimhorri/shipping-service-ecommerce-boot:0.1.0
+    platform: linux/amd64
     networks:
       - microservices_network
     ports:
@@ -103,12 +94,10 @@ services:
       - EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT=myzone
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
-      
+
   user-service-container:
     image: selimhorri/user-service-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8700:8700"
     networks:
@@ -121,12 +110,10 @@ services:
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
-      
+
   favourite-service-container:
     image: selimhorri/favourite-service-ecommerce-boot:0.1.0
+    platform: linux/amd64
     ports:
       - "8800:8800"
     networks:
@@ -139,10 +126,7 @@ services:
       - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
-    depends_on:
-      - service-discovery-container
-      - cloud-config-container
 
 networks:
   microservices_network:
-    driver: bridge
+    external: true
