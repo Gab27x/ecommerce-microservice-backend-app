@@ -96,7 +96,11 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
 
   user-service-container:
-    image: selimhorri/user-service-ecommerce-boot:0.1.0
+    build:
+      context: ./user-service   # Carpeta donde está el Dockerfile
+      dockerfile: Dockerfile
+      args:
+        PROJECT_VERSION: 0.1.0
     platform: linux/amd64
     ports:
       - "8700:8700"
