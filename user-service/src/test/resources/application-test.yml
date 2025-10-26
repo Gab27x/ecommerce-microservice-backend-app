@@ -1,0 +1,35 @@
+# Archivo: src/test/resources/application-test.yml
+
+server:
+  port: 0 # Usar un puerto aleatorio para evitar conflictos
+
+spring:
+  # 1. ANULAR DEPENDENCIAS EXTERNAS
+  zipkin:
+    enabled: false
+  cloud:
+    config:
+      enabled: false # No conectarse al Config Server durante los tests
+    netflix:
+      eureka:
+        client:
+          enabled: false # No registrar ni buscar en Eureka
+
+  # 2. CONFIGURACIÓN DE BASE DE DATOS PARA PRUEBAS (H2 en memoria)
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE # Nombre de DB diferente para test
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # Limpiar y reconstruir la DB para cada ejecución de test
+    show-sql: false # Opcional: reducir el ruido de logs SQL durante los tests
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  profiles:
+    active:
+    - test # Esto te permite usar esta configuración al correr tests
