@@ -35,7 +35,7 @@ sleep "$SLEEP_TIME"
 EUREKA_URL="http://localhost:8761/eureka/apps"
 MAX_RETRIES=10
 SUCCESS=false
-NODES_NUM=3
+NODES_NUM=5
 
 for i in $(seq 1 "$MAX_RETRIES"); do
     echo "Intento $i de $MAX_RETRIES..."
