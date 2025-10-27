@@ -27,7 +27,7 @@ docker compose -f project-compose.yml up -d --build
 echo "Compose levantado correctamente."
 
 # --- ESPERA INICIAL ---
-SLEEP_TIME=45
+SLEEP_TIME=30
 echo "Esperando ${SLEEP_TIME}s para asegurarse de que los servicios estén listos..."
 sleep "$SLEEP_TIME"
 
