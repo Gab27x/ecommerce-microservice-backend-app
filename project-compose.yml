@@ -1,0 +1,87 @@
+services:
+
+
+  api-gateway-container:
+    image: selimhorri/api-gateway-ecommerce-boot:0.1.0
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices_network
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_ZIPKIN_BASE-URL=http://zipkin:9411
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
+      - EUREKA_CLIENT_REGION=default
+      - EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT=myzone
+      - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
+
+
+
+
+  user-service-container:
+    build:
+      context: ./user-service   
+      dockerfile: Dockerfile
+      args:
+        PROJECT_VERSION: 0.1.0
+    platform: linux/amd64
+    ports:
+      - "8700:8700"
+    networks:
+      - microservices_network
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_ZIPKIN_BASE-URL=http://zipkin:9411
+      - EUREKA_CLIENT_REGION=default
+      - EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT=myzone
+      - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
+
+
+  order-service-container:
+    build: 
+      context: ./order-service
+      dockerfile: Dockerfile 
+      args:
+        PROJECT_VERSION: 0.1.0
+    platform: linux/amd64
+    ports:
+      - "8300:8300"
+    networks:
+      - microservices_network
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_ZIPKIN_BASE-URL=http://zipkin:9411
+      - EUREKA_CLIENT_REGION=default
+      - EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT=myzone
+      - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
+
+  payment-service-container:
+    build: 
+      context: ./payment-service
+      dockerfile: Dockerfile 
+      args:
+        PROJECT_VERSION: 0.1.0
+    platform: linux/amd64
+    ports:
+      - "8400:8400"
+    networks:
+      - microservices_network
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_ZIPKIN_BASE-URL=http://zipkin:9411
+      - EUREKA_CLIENT_REGION=default
+      - EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT=myzone
+      - EUREKA_CLIENT_SERVICEURL_MYZONE=http://service-discovery-container:8761/eureka
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
+
+
+networks:
+  microservices_network:
+    external: true
