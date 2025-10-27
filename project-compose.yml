@@ -42,7 +42,11 @@ services:
 
 
   order-service-container:
-    image: selimhorri/order-service-ecommerce-boot:0.1.0
+    build: 
+      context: ./order-service
+      dockerfile: Dockerfile 
+      args:
+        PROJECT_VERSION: 0.1.0
     platform: linux/amd64
     ports:
       - "8300:8300"
@@ -58,7 +62,11 @@ services:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
 
   payment-service-container:
-    image: selimhorri/payment-service-ecommerce-boot:0.1.0
+    build: 
+      context: ./payment-service
+      dockerfile: Dockerfile 
+      args:
+        PROJECT_VERSION: 0.1.0
     platform: linux/amd64
     ports:
       - "8400:8400"
