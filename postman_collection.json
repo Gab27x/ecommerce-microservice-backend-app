@@ -1,0 +1,533 @@
+{
+	"info": {
+		"_postman_id": "013174c0-6a93-4ae0-91ed-04d52e4a81a7",
+		"name": "software 5 taller 2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47238530",
+		"_collection_link": "https://gabrielernestoeb-5480584.postman.co/workspace/Gabriel-Escobar's-Workspace~29ec8656-9b7c-432d-84de-c2a56980a1a8/collection/47238530-013174c0-6a93-4ae0-91ed-04d52e4a81a7?action=share&source=collection_link&creator=47238530"
+	},
+	"item": [
+		{
+			"name": "Eureka",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8761/eureka/apps",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8761",
+					"path": [
+						"eureka",
+						"apps"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all users",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"5\",\n  \"firstName\": \"Gabriel\",\n  \"lastName\": \"Escobar\",\n  \"imageUrl\": \"https://bootdey.com/img/Content/avatar/avatar7.png\",\n  \"email\": \"gabriel.escobar@email.com\",\n  \"addressDtos\": [\n    {\n      \"fullAddress\": \"123 Main St\",\n      \"postalCode\": \"12345\",\n      \"city\": \"New York\"\n    }\n  ],\n  \"credential\": {\n    \"username\": \"gabriel.escobar\",\n    \"password\": \"securePassword123\",\n    \"roleBasedAuthority\": \"ROLE_USER\",\n    \"isEnabled\": true,\n    \"isAccountNonExpired\": true,\n    \"isAccountNonLocked\": true,\n    \"isCredentialsNonExpired\": true\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{users}}",
+					"host": [
+						"{{users}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json()",
+							"pm.collectionVariables.set('user_id',data.userId);",
+							"pm.collectionVariables.set('credential_id', data.credential.credentialId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Andrea\",\n  \"lastName\": \"Garcia\",\n  \"imageUrl\": \"https://images.example.com/andrea.png\",\n  \"email\": \"andrea.garcia@mail.com\",\n  \"phone\": \"+34600123456\",\n  \"credential\": {\n    \"username\": \"andrea_g\",\n    \"password\": \"securePassword123\",\n    \"roleBasedAuthority\": \"ROLE_USER\",\n    \"isEnabled\": true,\n    \"isAccountNonExpired\": true,\n    \"isAccountNonLocked\": true,\n    \"isCredentialsNonExpired\": true\n  },\n  \"addressDtos\": [\n    {\n      \"fullAddress\": \"Avenida Siempre Viva, 742\",\n      \"postalCode\": \"08001\",\n      \"city\": \"Barcelona\"\n    },\n    {\n      \"fullAddress\": \"Calle Falsa, 123\",\n      \"postalCode\": \"41001\",\n      \"city\": \"Sevilla\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{users}}",
+					"host": [
+						"{{users}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user by Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{users}}{{user_id}}",
+					"host": [
+						"{{users}}{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update user",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Andrea Paola\",\n  \"lastName\": \"Garcia Barco\",\n  \"imageUrl\": \"https://images.example.com/andrea.png\",\n  \"email\": \"andrea.garcia@mail.com\",\n  \"phone\": \"+34600123456\",\n  \"credential\": {\n    \"username\": \"andrea_g\",\n    \"password\": \"securePassword123\",\n    \"roleBasedAuthority\": \"ROLE_USER\",\n    \"isEnabled\": true,\n    \"isAccountNonExpired\": true,\n    \"isAccountNonLocked\": true,\n    \"isCredentialsNonExpired\": true\n  },\n  \"addressDtos\": [\n    {\n      \"fullAddress\": \"Avenida Siempre Viva, 742\",\n      \"postalCode\": \"08001\",\n      \"city\": \"Barcelona\"\n    },\n    {\n      \"fullAddress\": \"Calle Falsa, 123\",\n      \"postalCode\": \"41001\",\n      \"city\": \"Sevilla\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{users}}{{user_id}}",
+					"host": [
+						"{{users}}{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all orders",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{orders}}",
+					"host": [
+						"{{orders}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all carts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{carts}}",
+					"host": [
+						"{{carts}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json();",
+							"pm.collectionVariables.set(\"cart_id\", data.cartId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{user_id}}\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{carts}}",
+					"host": [
+						"{{carts}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json();",
+							"pm.collectionVariables.set(\"order_id\",data.orderId)"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderDesc\": \"Compra inicial\",\n    \"orderDate\": \"26-10-2025__21:45:00:000000\",\n\n    \"orderFee\": 5000.0,\n    \"cart\": {\n        \"cartId\": {{cart_id}},\n        \"userId\": {{user_id}}\n    }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{orders}}",
+					"host": [
+						"{{orders}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get order by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{orders}}{{order_id}}",
+					"host": [
+						"{{orders}}{{order_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update order",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderDesc\": \"Compra inicial222\",\n    \"orderDate\": \"26-10-2025__21:45:00:000000\",\n\n    \"orderFee\": 5000.0,\n    \"cart\": {\n        \"cartId\": {{cart_id}},\n        \"userId\": {{user_id}}\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{orders}}{{order_id}}",
+					"host": [
+						"{{orders}}{{order_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all payments",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{payments}}",
+					"host": [
+						"{{payments}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json();",
+							"pm.collectionVariables.set(\"payment_id\",data.paymentId)"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"isPayed\": false,\n    \"paymentStatus\": \"NOT_STARTED\",\n\n\n    \"order\": {\n        \"orderId\": {{order_id}}\n    }\n}\n\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{payments}}",
+					"host": [
+						"{{payments}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get payments by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{payments}}{{payment_id}}",
+					"host": [
+						"{{payments}}{{payment_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete payment",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{payments}}{{payment_id}}",
+					"host": [
+						"{{payments}}{{payment_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete order",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{orders}}{{order_id}}",
+					"host": [
+						"{{orders}}{{order_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json();",
+							"pm.collectionVariables.set(\"order_id\",data.orderId)"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderDesc\": \"Compra inicial\",\n    \"orderDate\": \"26-10-2025__21:45:00:000000\",\n\n    \"orderFee\": 5000.0,\n    \"cart\": {\n        \"cartId\": {{cart_id}},\n        \"userId\": {{user_id}}\n    }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{carts}}",
+					"host": [
+						"{{carts}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"juan.perez@example.com\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"password\": \"Secreta123\",\n  \"phoneNumber\": \"3001234567\",\n  \"address\": \"Calle Falsa 123, Bogotá\"\n\n}\n"
+				},
+				"url": {
+					"raw": "{{users}}{{user_id}}",
+					"host": [
+						"{{users}}{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base",
+			"value": ""
+		},
+		{
+			"key": "port_users",
+			"value": ""
+		},
+		{
+			"key": "port_orders",
+			"value": ""
+		},
+		{
+			"key": "port_payments",
+			"value": ""
+		},
+		{
+			"key": "users",
+			"value": ""
+		},
+		{
+			"key": "orders",
+			"value": ""
+		},
+		{
+			"key": "payments",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "credential_id",
+			"value": ""
+		},
+		{
+			"key": "order_id",
+			"value": ""
+		},
+		{
+			"key": "carts",
+			"value": ""
+		},
+		{
+			"key": "cart_id",
+			"value": ""
+		},
+		{
+			"key": "payment_id",
+			"value": ""
+		}
+	]
+}
