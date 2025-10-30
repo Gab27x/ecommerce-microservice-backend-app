@@ -13,14 +13,11 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8761/eureka/apps",
-					"protocol": "http",
+					"raw": "{{eureka}}eureka/apps",
 					"host": [
-						"localhost"
+						"{{eureka}}eureka"
 					],
-					"port": "8761",
 					"path": [
-						"eureka",
 						"apps"
 					]
 				}
@@ -482,15 +479,39 @@
 			"value": ""
 		},
 		{
-			"key": "port_users",
+			"key": "eureka_container",
 			"value": ""
 		},
 		{
-			"key": "port_orders",
+			"key": "user_container",
 			"value": ""
 		},
 		{
-			"key": "port_payments",
+			"key": "order_container",
+			"value": ""
+		},
+		{
+			"key": "payment_container",
+			"value": ""
+		},
+		{
+			"key": "eureka_port",
+			"value": ""
+		},
+		{
+			"key": "user_port",
+			"value": ""
+		},
+		{
+			"key": "order_port",
+			"value": ""
+		},
+		{
+			"key": "payment_port",
+			"value": ""
+		},
+		{
+			"key": "eureka",
 			"value": ""
 		},
 		{
@@ -506,6 +527,10 @@
 			"value": ""
 		},
 		{
+			"key": "carts",
+			"value": ""
+		},
+		{
 			"key": "user_id",
 			"value": ""
 		},
@@ -515,10 +540,6 @@
 		},
 		{
 			"key": "order_id",
-			"value": ""
-		},
-		{
-			"key": "carts",
 			"value": ""
 		},
 		{
