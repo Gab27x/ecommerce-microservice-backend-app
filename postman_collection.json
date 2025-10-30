@@ -57,9 +57,9 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const data = pm.response.json()",
-							"pm.collectionVariables.set('user_id',data.userId);",
-							"pm.collectionVariables.set('credential_id', data.credential.credentialId);"
+							"const data1 = pm.response.json()",
+							"pm.collectionVariables.set('user_id',data1.userId);",
+							"pm.collectionVariables.set('credential_id', data1.credential.credentialId);"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -179,8 +179,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const data = pm.response.json();",
-							"pm.collectionVariables.set(\"cart_id\", data.cartId);"
+							"const data2 = pm.response.json();",
+							"pm.collectionVariables.set(\"cart_id\", data2.cartId);"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -216,8 +216,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const data = pm.response.json();",
-							"pm.collectionVariables.set(\"order_id\",data.orderId)"
+							"const data3 = pm.response.json();",
+							"pm.collectionVariables.set(\"order_id\",data3.orderId)"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -304,8 +304,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const data = pm.response.json();",
-							"pm.collectionVariables.set(\"payment_id\",data.paymentId)"
+							"const data4 = pm.response.json();",
+							"pm.collectionVariables.set(\"payment_id\",data4.paymentId)"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -388,43 +388,6 @@
 			"response": []
 		},
 		{
-			"name": "Delete cart",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"const data = pm.response.json();",
-							"pm.collectionVariables.set(\"order_id\",data.orderId)"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"orderDesc\": \"Compra inicial\",\n    \"orderDate\": \"26-10-2025__21:45:00:000000\",\n\n    \"orderFee\": 5000.0,\n    \"cart\": {\n        \"cartId\": {{cart_id}},\n        \"userId\": {{user_id}}\n    }\n}\n",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{carts}}",
-					"host": [
-						"{{carts}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Delete User",
 			"request": {
 				"method": "DELETE",
@@ -437,7 +400,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"juan.perez@example.com\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"password\": \"Secreta123\",\n  \"phoneNumber\": \"3001234567\",\n  \"address\": \"Calle Falsa 123, Bogotá\"\n\n}\n"
+					"raw": ""
 				},
 				"url": {
 					"raw": "{{users}}{{user_id}}",
