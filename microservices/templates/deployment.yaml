@@ -1,0 +1,46 @@
+{{- $namespace := .Values.namespace }}
+---
+{{- range $svc, $config := .Values }}
+{{- if and (ne $svc "namespace") $config.image }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $svc }}
+  template:
+    metadata:
+      labels:
+        app: {{ $svc }}
+    spec:
+      containers:
+        - name: {{ $svc }}
+          image: {{ $config.image }}
+          ports:
+            - containerPort: {{ $config.port }}
+          env:
+          {{- range $key, $value := $config.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $svc }}
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: {{ $svc }}
+  ports:
+    - protocol: TCP
+      port: {{ $config.port }}
+      targetPort: {{ $config.port }}
+  type: ClusterIP
+---
+{{- end }}
+{{- end }}
