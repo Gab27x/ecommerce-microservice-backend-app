@@ -1,0 +1,39 @@
+# microservices/templates/newman-job.yaml
+
+{{- if .Values.tests.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # Crea un nombre único para cada ejecución
+  name: {{ printf "%s-api-tests-%s" (include "microservices.fullname" .) (randAlphaNum 5 | lower) }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "microservices.labels" . | nindent 4 }}
+    app.kubernetes.io/component: newman-tests
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      # Etiqueta el Pod para facilitar la búsqueda en kubectl get pods
+      labels:
+        app.kubernetes.io/component: newman-tests
+    spec:
+      containers:
+      - name: newman-runner
+        # Obtiene la imagen de values.yaml: gab27x/microservices:my-newman-latest
+        image: {{ .Values.tests.image }} 
+        # Comando para ejecutar Newman
+        command: ["/bin/sh", "-c"]
+        args:
+          - "sleep 60 && newman run /app/postman_collection.json \
+            --environment /app/variables_pipeline_minikube.json \
+            --reporters cli,junit \
+            --reporter-junit-export /tmp/test-results.xml \
+            --insecure \
+            --delay-request 300"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      restartPolicy: OnFailure
+{{- end }}

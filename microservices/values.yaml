@@ -64,3 +64,8 @@ payment-service:
     EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT: myzone
     EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+tests:
+  # Asegura que el Job se genere
+  enabled: true 
+  # Nombre de la imagen que acabas de construir
+  image: "gab27x/microservices:my-newman-latest"
