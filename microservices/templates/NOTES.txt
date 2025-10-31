@@ -1,0 +1,38 @@
+# microservices/templates/NOTES.txt
+{{- $namespace := .Values.namespace }}
+{{- range $svc, $config := .Values }}
+{{- if and (ne $svc "namespace") (ne $svc "tests") $config.image }}
+Service {{ $svc }} deployed!
+
+Access it via ClusterIP service:
+  kubectl get svc {{ $svc }} -n {{ $namespace }}
+
+Port:
+  {{ $config.port }}
+
+{{- end }}
+{{- end }}
+
+API Gateway (entry point):
+  kubectl get svc api-gateway -n {{ $namespace }}
+  Port: 8080
+
+Zipkin UI:
+  kubectl get svc zipkin -n {{ $namespace }}
+  Port: 9411
+
+Cloud Config:
+  kubectl get svc cloud-config -n {{ $namespace }}
+  Port: 9296
+
+Newman API Tests Job:
+  {{- if .Values.tests.enabled }}
+  Job name will be auto-generated, run:
+    kubectl get jobs -n {{ $namespace }} | grep newman
+  After completion, view results:
+    kubectl logs job/<job-name> -n {{ $namespace }}
+  {{- end }}
+
+Tips:
+  - Use `kubectl get pods -n {{ $namespace }}` to check pod status
+  - Use `kubectl describe pod <pod-name> -n {{ $namespace }}` for debug info
