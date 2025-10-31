@@ -30,7 +30,8 @@ api-gateway:
     EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
 user-service:
-  image: gab27x/microservices:user-service-1
+  image: gab27x/microservices:user-service-latest
+  imagePullPolicy: Always # <--- AÑADIDO: Asegura la extracción de la última imagen.
   port: 8700
   env:
     SPRING_PROFILES_ACTIVE: dev
@@ -41,7 +42,8 @@ user-service:
     EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
 order-service:
-  image: gab27x/microservices:order-service-1
+  image: gab27x/microservices:order-service-latest
+  imagePullPolicy: Always # <--- AÑADIDO: Asegura la extracción de la última imagen.
   port: 8300
   env:
     SPRING_PROFILES_ACTIVE: dev
