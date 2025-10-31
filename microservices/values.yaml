@@ -1,0 +1,64 @@
+namespace: stage
+zipkin:
+  image: openzipkin/zipkin
+  port: 9411
+service-discovery:
+  image: selimhorri/service-discovery-ecommerce-boot:0.1.0
+  port: 8761
+  env:
+    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+    SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
+cloud-config:
+  image: selimhorri/cloud-config-ecommerce-boot:0.1.0
+  port: 9296
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+    EUREKA_CLIENT_REGION: default
+    EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT: myzone
+    EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+api-gateway:
+  image: selimhorri/api-gateway-ecommerce-boot:0.1.0
+  port: 8080
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+    SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
+    EUREKA_CLIENT_REGION: default
+    EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT: myzone
+    EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+user-service:
+  image: gab27x/microservices:user-service-1
+  port: 8700
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+    SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
+    EUREKA_CLIENT_REGION: default
+    EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT: myzone
+    EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+order-service:
+  image: gab27x/microservices:order-service-1
+  port: 8300
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+    SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
+    EUREKA_CLIENT_REGION: default
+    EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT: myzone
+    EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+payment-service:
+  image: selimhorri/payment-service-ecommerce-boot:0.1.0
+  port: 8400
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+    SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
+    EUREKA_CLIENT_REGION: default
+    EUREKA_CLIENT_AVAILABILITYZONES_DEFAULT: myzone
+    EUREKA_CLIENT_SERVICEURL_MYZONE: http://service-discovery:8761/eureka
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
