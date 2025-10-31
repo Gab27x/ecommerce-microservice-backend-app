@@ -1,0 +1,32 @@
+{
+  "id": "pipeline-env",
+  "name": "Pipeline Environment",
+  "values": [
+    { "key": "base", "value": "http://", "enabled": true },
+
+    { "key": "eureka_container", "value": "service-discovery:", "enabled": true },
+    { "key": "user_container", "value": "user-service:", "enabled": true },
+    { "key": "order_container", "value": "order-service:", "enabled": true },
+    { "key": "payment_container", "value": "payment-service:", "enabled": true },
+
+    { "key": "eureka_port", "value": "8761", "enabled": true },
+    { "key": "user_port", "value": "8700", "enabled": true },
+    { "key": "order_port", "value": "8300", "enabled": true },
+    { "key": "payment_port", "value": "8400", "enabled": true },
+
+    { "key": "eureka", "value": "{{base}}{{eureka_container}}{{eureka_port}}/", "enabled": true },
+    { "key": "users", "value": "{{base}}{{user_container}}{{user_port}}/user-service/api/users/", "enabled": true },
+    { "key": "orders", "value": "{{base}}{{order_container}}{{order_port}}/order-service/api/orders/", "enabled": true },
+    { "key": "payments", "value": "{{base}}{{payment_container}}{{payment_port}}/payment-service/api/payments/", "enabled": true },
+    { "key": "carts", "value": "{{base}}{{order_container}}{{order_port}}/order-service/api/carts/", "enabled": true },
+
+    { "key": "user_id", "value": "5", "enabled": true },
+    { "key": "credential_id", "value": "5", "enabled": true },
+    { "key": "order_id", "value": "5", "enabled": true },
+    { "key": "cart_id", "value": "5", "enabled": true },
+    { "key": "payment_id", "value": "5", "enabled": true }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-10-30T00:00:00.000Z",
+  "_postman_exported_using": "Postman"
+}
