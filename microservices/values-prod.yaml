@@ -34,7 +34,7 @@ user-service:
   imagePullPolicy: Always
   port: 8700
   env:
-    SPRING_PROFILES_ACTIVE: prod
+    SPRING_PROFILES_ACTIVE: dev
     SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
     SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
     EUREKA_CLIENT_REGION: default
@@ -46,7 +46,7 @@ order-service:
   imagePullPolicy: Always
   port: 8300
   env:
-    SPRING_PROFILES_ACTIVE: prod
+    SPRING_PROFILES_ACTIVE: dev
     SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
     SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
     EUREKA_CLIENT_REGION: default
@@ -57,7 +57,7 @@ payment-service:
   image: selimhorri/payment-service-ecommerce-boot:0.1.0
   port: 8400
   env:
-    SPRING_PROFILES_ACTIVE: prod
+    SPRING_PROFILES_ACTIVE: dev
     SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
     SPRING_CONFIG_IMPORT: optional:configserver:http://cloud-config:9296/
     EUREKA_CLIENT_REGION: default
