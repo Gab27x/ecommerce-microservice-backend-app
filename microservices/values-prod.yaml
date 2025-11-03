@@ -67,3 +67,11 @@ payment-service:
 tests:
   enabled: true
   image: "gab27x/microservices:my-newman-latest"
+  
+locust:
+  enabled: true
+  image: "gab27x/microservices:locust-latest"
+  mode: "headless"      # o "web" si quieres lanzar la interfaz
+  users: "50"
+  spawnRate: "10"
+  runTime: "2m"
