@@ -25,7 +25,7 @@ spec:
         # Comando para ejecutar Newman
         command: ["/bin/sh", "-c"]
         args:
-          - "sleep 60 && newman run /app/postman_collection.json \
+          - "sleep 200 && newman run /app/postman_collection.json \
             --environment /app/variables_pipeline_minikube.json \
             --reporters cli,junit \
             --reporter-junit-export /tmp/test-results.xml \
