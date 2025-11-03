@@ -70,10 +70,11 @@ tests:
 
 
 # El bloque de locust se usará solo para el Job
-locustJob:
+
+locust:
   enabled: true
   image: "gab27x/microservices:locust-latest"
-  mode: "headless"
-  users: "50"
-  spawnRate: "10"
+  users: 50
+  spawnRate: 10
   runTime: "2m"
+  port: 8089
