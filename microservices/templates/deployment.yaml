@@ -1,7 +1,8 @@
 {{- $namespace := .Values.namespace }}
 ---
 {{- range $svc, $config := .Values }}
-{{- if and (ne $svc "namespace") (ne $svc "tests") $config.image }}  # <-- CORRECCIÓN APLICADA AQUÍ
+{{- if and (ne $svc "namespace") (ne $svc "tests") (ne $svc "locust") $config.image }}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:

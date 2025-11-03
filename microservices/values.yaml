@@ -69,3 +69,6 @@ tests:
   enabled: true 
   # Nombre de la imagen que acabas de construir
   image: "gab27x/microservices:my-newman-latest"
+
+locust:
+  enabled: false

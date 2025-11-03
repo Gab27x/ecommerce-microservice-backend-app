@@ -1,0 +1,29 @@
+{{- if .Values.locust.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "microservices.fullname" . }}-locust-job
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    metadata:
+      name: locust-job
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: locust-job
+          image: {{ .Values.locust.image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOCUST_USERS
+              value: "{{ .Values.locust.users }}"
+            - name: LOCUST_SPAWN_RATE
+              value: "{{ .Values.locust.spawnRate }}"
+            - name: LOCUST_RUN_TIME
+              value: "{{ .Values.locust.runTime }}"
+            - name: LOCUST_MODE
+              value: "headless"
+          ports:
+            - containerPort: {{ .Values.locust.port }}
+              name: http
+{{- end }}

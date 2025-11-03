@@ -67,3 +67,14 @@ payment-service:
 tests:
   enabled: true
   image: "gab27x/microservices:my-newman-latest"
+
+
+# El bloque de locust se usará solo para el Job
+
+locust:
+  enabled: true
+  image: "gab27x/microservices:locust-latest"
+  users: 50
+  spawnRate: 10
+  runTime: "2m"
+  port: 8089
