@@ -26,5 +26,6 @@ CMD if [ "$LOCUST_MODE" = "web" ]; then \
         locust -f locustfile.py --headless \
             --users $LOCUST_USERS \
             --spawn-rate $LOCUST_SPAWN_RATE \
-            --run-time $LOCUST_RUN_TIME; \
+            --run-time $LOCUST_RUN_TIME \
+            --host=http://dummy; \
     fi

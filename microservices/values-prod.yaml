@@ -67,11 +67,13 @@ payment-service:
 tests:
   enabled: true
   image: "gab27x/microservices:my-newman-latest"
-  
-locust:
+
+
+# El bloque de locust se usará solo para el Job
+locustJob:
   enabled: true
   image: "gab27x/microservices:locust-latest"
-  mode: "headless"      # o "web" si quieres lanzar la interfaz
+  mode: "headless"
   users: "50"
   spawnRate: "10"
   runTime: "2m"

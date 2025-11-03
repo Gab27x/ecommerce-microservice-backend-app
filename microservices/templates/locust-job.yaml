@@ -1,4 +1,4 @@
-{{- if .Values.locust.enabled }}
+{{- if .Values.locustJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -15,16 +15,16 @@ spec:
     spec:
       containers:
         - name: locust-runner
-          image: {{ .Values.locust.image }}
+          image: {{ .Values.locustJob.image }}
           env:
             - name: LOCUST_MODE
-              value: "{{ .Values.locust.mode }}"
+              value: "{{ .Values.locustJob.mode }}"
             - name: LOCUST_USERS
-              value: "{{ .Values.locust.users }}"
+              value: "{{ .Values.locustJob.users }}"
             - name: LOCUST_SPAWN_RATE
-              value: "{{ .Values.locust.spawnRate }}"
+              value: "{{ .Values.locustJob.spawnRate }}"
             - name: LOCUST_RUN_TIME
-              value: "{{ .Values.locust.runTime }}"
+              value: "{{ .Values.locustJob.runTime }}"
           resources:
             limits:
               memory: "256Mi"
