@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.selimhorri.app.dto.ProductDto;
 import com.selimhorri.app.exception.wrapper.ProductNotFoundException;
 import com.selimhorri.app.helper.ProductMappingHelper;
+import com.selimhorri.app.metrics.BusinessMetricsService;
 import com.selimhorri.app.repository.ProductRepository;
 import com.selimhorri.app.service.ProductService;
 
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductServiceImpl implements ProductService {
 	
 	private final ProductRepository productRepository;
+	private final BusinessMetricsService businessMetricsService;
 	
 	@Override
 	public List<ProductDto> findAll() {
@@ -45,22 +47,33 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public ProductDto save(final ProductDto productDto) {
 		log.info("*** ProductDto, service; save product *");
-		return ProductMappingHelper.map(this.productRepository
+		ProductDto savedProduct = ProductMappingHelper.map(this.productRepository
 				.save(ProductMappingHelper.map(productDto)));
+		// Registrar métrica de negocio: producto creado
+		businessMetricsService.recordProductCreated();
+		// Actualizar gauge de total de productos
+		businessMetricsService.updateTotalProductsGauge(this.productRepository.count());
+		return savedProduct;
 	}
 	
 	@Override
 	public ProductDto update(final ProductDto productDto) {
 		log.info("*** ProductDto, service; update product *");
-		return ProductMappingHelper.map(this.productRepository
+		ProductDto updatedProduct = ProductMappingHelper.map(this.productRepository
 				.save(ProductMappingHelper.map(productDto)));
+		// Registrar métrica de negocio: producto actualizado
+		businessMetricsService.recordProductUpdated();
+		return updatedProduct;
 	}
 	
 	@Override
 	public ProductDto update(final Integer productId, final ProductDto productDto) {
 		log.info("*** ProductDto, service; update product with productId *");
-		return ProductMappingHelper.map(this.productRepository
+		ProductDto updatedProduct = ProductMappingHelper.map(this.productRepository
 				.save(ProductMappingHelper.map(this.findById(productId))));
+		// Registrar métrica de negocio: producto actualizado
+		businessMetricsService.recordProductUpdated();
+		return updatedProduct;
 	}
 	
 	@Override
@@ -68,6 +81,10 @@ public class ProductServiceImpl implements ProductService {
 		log.info("*** Void, service; delete product by id *");
 		this.productRepository.delete(ProductMappingHelper
 				.map(this.findById(productId)));
+		// Registrar métrica de negocio: producto eliminado
+		businessMetricsService.recordProductDeleted();
+		// Actualizar gauge de total de productos
+		businessMetricsService.updateTotalProductsGauge(this.productRepository.count());
 	}
 	
 	
