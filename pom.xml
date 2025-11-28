@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.5.7</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
 	</parent>
 	<groupId>com.selimhorri</groupId>
 	<artifactId>ecommerce-microservice-backend</artifactId>
@@ -16,13 +13,21 @@
 	<name>ecommerce-microservice-backend</name>
 	<description>Ecommerce backend implemented in Spring Boot and Spring Cloud!</description>
 	<packaging>pom</packaging>
-	
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>2020.0.4</spring-cloud.version>
 		<testcontainers.version>1.16.0</testcontainers.version>
+		<sonar.skip>true</sonar.skip>
+		<sonar.organization>alejoamu</sonar.organization>
+		<sonar.projectKey>ecommerce-microservice-backend</sonar.projectKey>
+		<sonar.projectName>ecommerce-microservice-backend</sonar.projectName>
+		<sonar.coverage.jacoco.xmlReportPaths>**/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<jacoco.version>0.8.8</jacoco.version>
+		<owasp.dependency-check.version>9.0.9</owasp.dependency-check.version>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.language>java</sonar.language>
 	</properties>
-	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -79,7 +84,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -98,7 +102,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
 	<modules>
 		<module>service-discovery</module>
 		<module>cloud-config</module>
@@ -111,26 +114,92 @@
 		<module>shipping-service</module>
 		<module>payment-service</module>
 	</modules>
-	
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
-			 <plugin>
-            <groupId>org.sonarsource.scanner.maven</groupId>
-            <artifactId>sonar-maven-plugin</artifactId>
-            <version>3.10.0.2594</version>
-        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
+				<configuration>
+					<systemPropertyVariables>
+						<spring.config.import></spring.config.import>
+						<SPRING_CONFIG_IMPORT></SPRING_CONFIG_IMPORT>
+						<spring.cloud.config.enabled>false</spring.cloud.config.enabled>
+						<eureka.client.enabled>false</eureka.client.enabled>
+						<eureka.client.register-with-eureka>false</eureka.client.register-with-eureka>
+						<eureka.client.fetch-registry>false</eureka.client.fetch-registry>
+						<spring.profiles.active>test</spring.profiles.active>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version>
+			</plugin>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>${owasp.dependency-check.version}</version>
+				<configuration>
+					<failBuildOnCVSS>7.0</failBuildOnCVSS>
+					<skipProvidedScope>false</skipProvidedScope>
+					<skipRuntimeScope>false</skipRuntimeScope>
+					<skipTestScope>false</skipTestScope>
+					<skipSystemScope>true</skipSystemScope>
+					<format>HTML</format>
+					<format>JSON</format>
+					<format>XML</format>
+					<suppressionFiles>
+						<suppressionFile>${project.basedir}/owasp-suppressions.xml</suppressionFile>
+					</suppressionFiles>
+					<autoUpdate>true</autoUpdate>
+					<dataDirectory>${project.basedir}/.dependency-check-data</dataDirectory>
+					<nvdValidForHours>24</nvdValidForHours>
+					<failOnError>false</failOnError>
+				</configuration>
+				<executions>
+					<execution>
+						<id>dependency-check</id>
+						<phase>none</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report-aggregate</id>
+						<phase>none</phase>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
-		
 		<finalName>${project.artifactId}-v${project.version}</finalName>
 	</build>
-	
 </project>
-
-
-
-
