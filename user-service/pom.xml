@@ -73,7 +73,6 @@
 			<artifactId>mysql</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 	
 	<dependencyManagement>
@@ -109,7 +108,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			
 		</plugins>
 		<finalName>${project.artifactId}-v${project.version}</finalName>
 	</build>

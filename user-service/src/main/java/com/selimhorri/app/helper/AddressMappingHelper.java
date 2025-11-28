@@ -7,72 +7,52 @@ import com.selimhorri.app.dto.UserDto;
 
 public interface AddressMappingHelper {
 	
-	static AddressDto map(final Address address) {
-		if (address == null) {
-			return null;
-		}
-		
-		UserDto userDto = null;
-		if (address.getUser() != null) {
-			userDto = UserDto.builder()
-					.userId(address.getUser().getUserId())
-					.firstName(address.getUser().getFirstName())
-					.lastName(address.getUser().getLastName())
-					.imageUrl(address.getUser().getImageUrl())
-					.email(address.getUser().getEmail())
-					.phone(address.getUser().getPhone())
-					.build();
-		}
-		
+	public static AddressDto map(final Address address) {
 		return AddressDto.builder()
 				.addressId(address.getAddressId())
 				.fullAddress(address.getFullAddress())
 				.postalCode(address.getPostalCode())
 				.city(address.getCity())
-				.userDto(userDto)
-				.build();
-	}
-	
-	// Método para evitar referencia circular al mapear desde User
-	static AddressDto mapWithoutUser(final Address address) {
-		if (address == null) {
-			return null;
-		}
-		
-		return AddressDto.builder()
-				.addressId(address.getAddressId())
-				.fullAddress(address.getFullAddress())
-				.postalCode(address.getPostalCode())
-				.city(address.getCity())
+				.userDto(
+					UserDto.builder()
+						.userId(address.getUser().getUserId())
+						.firstName(address.getUser().getFirstName())
+						.lastName(address.getUser().getLastName())
+						.imageUrl(address.getUser().getImageUrl())
+						.email(address.getUser().getEmail())
+						.phone(address.getUser().getPhone())
+						.build())
 				.build();
 	}
 	
 	public static Address map(final AddressDto addressDto) {
-		if (addressDto == null) {
-			return null;
-		}
-		
-		Address address = Address.builder()
+		return Address.builder()
 				.addressId(addressDto.getAddressId())
 				.fullAddress(addressDto.getFullAddress())
 				.postalCode(addressDto.getPostalCode())
 				.city(addressDto.getCity())
+				.user(
+					User.builder()
+						.userId(addressDto.getUserDto().getUserId())
+						.firstName(addressDto.getUserDto().getFirstName())
+						.lastName(addressDto.getUserDto().getLastName())
+						.imageUrl(addressDto.getUserDto().getImageUrl())
+						.email(addressDto.getUserDto().getEmail())
+						.phone(addressDto.getUserDto().getPhone())
+						.build())
 				.build();
-		
-		// Establecer relación bidireccional con User
-		if (addressDto.getUserDto() != null) {
-			User user = User.builder()
-					.userId(addressDto.getUserDto().getUserId())
-					.firstName(addressDto.getUserDto().getFirstName())
-					.lastName(addressDto.getUserDto().getLastName())
-					.imageUrl(addressDto.getUserDto().getImageUrl())
-					.email(addressDto.getUserDto().getEmail())
-					.phone(addressDto.getUserDto().getPhone())
-					.build();
-			address.setUser(user);
-		}
-		
-		return address;
 	}
 	
+	
+	
 }
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,3 @@
-
 server:
   servlet:
     context-path: /user-service
@@ -6,13 +5,31 @@ server:
 spring:
   zipkin:
     base-url: ${SPRING_ZIPKIN_BASE_URL:http://localhost:9411/}
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      probability: ${SLEUTH_SAMPLER_PROBABILITY:1.0}
+    zipkin:
+      base-url: ${SPRING_ZIPKIN_BASE_URL:http://localhost:9411/}
   config:
     import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:9296}
+    name: ${spring.application.name}
+    profile: ${spring.profiles.active:dev}
   application:
     name: USER-SERVICE
   profiles:
     active:
     - dev
+  cloud:
+    config:
+      enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}
+      fail-fast: false
+      retry:
+        initial-interval: 1000
+        max-attempts: 6
+        max-interval: 2000
+        multiplier: 1.1
 
 resilience4j:
   circuitbreaker:
@@ -27,6 +44,19 @@ resilience4j:
         sliding-window-size: 10
         wait-duration-in-open-state: 5s
         sliding-window-type: COUNT_BASED
+  retry:
+    instances:
+      userService:
+        max-attempts: 3
+        wait-duration: 1000
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - org.springframework.web.client.ResourceAccessException
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException
+          - javax.validation.ValidationException
 
 management:
   health:
@@ -35,11 +65,9 @@ management:
   endpoint:
     health:
       show-details: always
-
-
-
-
-
-
-
-
+    refresh:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,metrics,prometheus
