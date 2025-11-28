@@ -1,4 +1,3 @@
-
 version: '3'
 services:
   service-discovery-container:
@@ -7,6 +6,12 @@ services:
       - 8761:8761
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
+    networks:
+      - microservices_network
 
-
-
+networks:
+  microservices_network:
+    external: true
+    name: microservices_network
