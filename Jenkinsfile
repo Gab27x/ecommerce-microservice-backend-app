@@ -13,6 +13,12 @@ pipeline {
 
     stages {
 
+        stage('clean'){
+            steps{
+                cleanWs()
+            
+            }
+        }
 
         stage('Scanning Branch') {
             steps {
@@ -147,10 +153,7 @@ pipeline {
 
 
     post {
-        always {
-            cleanWs()
-            sh 'ls -la'
-        }
+
     }
 
 
