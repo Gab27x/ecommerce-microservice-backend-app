@@ -119,32 +119,35 @@ pipeline {
             when { branch 'develop' }
             steps {
                 script {
-
                     sh "mkdir -p trivy-reports"
+
                     sh '''
-                        curl -L https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o html.tpl
+                        curl -L https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl \
+                        -o html.tpl
                     '''
+
                     sh '''
-                    docker run --rm \
-                    -v ${PWD}:/repo \
-                    aquasec/trivy:latest fs /repo \
-                    --template "@html.tpl" \
-                    --exit-code 1 \
-                    --severity HIGH,CRITICAL \
-                    --scanners vulnerability,secret || true
+                        docker run --rm \
+                            -v ${PWD}:/repo \
+                            aquasec/trivy:latest fs /repo \
+                            --template "@/repo/html.tpl" \
+                            --exit-code 1 \
+                            --severity HIGH,CRITICAL \
+                            --scanners vulnerability,secret > trivy-reports/report.html || true
                     '''
 
                     publishHTML(target: [
-                            allowMissing: true,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'trivy-reports',
-                            reportFiles: '*.html',
-                            reportName: 'Trivy Scan Report'
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'trivy-reports',
+                        reportFiles: '*.html',
+                        reportName: 'Trivy Scan Report'
                     ])
                 }
             }
         }
+
 
     }
 
