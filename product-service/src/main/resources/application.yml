@@ -59,19 +59,26 @@ resilience4j:
           - java.lang.IllegalArgumentException
           - javax.validation.ValidationException
 
+
 management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      base-path: /actuator
   health:
     circuitbreakers:
+      enabled: true
+    livenessstate:
+      enabled: true
+    readinessstate:
       enabled: true
   endpoint:
     health:
       show-details: always
-    refresh:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: health,info,refresh,metrics,prometheus
+      probes:
+        enabled: true
+
 
 
 
