@@ -9,7 +9,7 @@ pipeline {
     }
     environment {
         GIT_REPO = 'https://github.com/Gab27x/ecommerce-microservice-backend-app.git'
-        DOCKERHUB_USER = 'Gab27x'
+        DOCKERHUB_USER = 'gab27x'
         SERVICES = 'api-gateway cloud-config favourite-service order-service payment-service product-service proxy-client service-discovery shipping-service user-service'
         DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
     }
