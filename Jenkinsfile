@@ -73,43 +73,31 @@ pipeline {
             }
         }
 
-
-            stage('Build Docker Images of each service') {
-        when {
-            anyOf {
-                branch 'develop'
-                branch 'stage'
-                branch 'master'
-            }
+stage('Login Docker Hub') {
+    steps {
+        withCredentials([string(credentialsId: "${DOCKER_CREDENTIALS_ID}", variable: 'DOCKER_PASS')]) {
+            sh "docker login -u ${DOCKERHUB_USER} -p ${DOCKER_PASS}"
         }
-        steps {
-            script {
-                SERVICES.split().each { service ->
-                    sh "docker buildx build --platform linux/amd64,linux/arm64 -t ${DOCKERHUB_USER}/${service}:${IMAGE_TAG} --build-arg SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} --push ./${service}"
-                }
+    }
+}
+
+stage('Build & Push Docker Images') {
+    when {
+        anyOf {
+            branch 'develop'
+            branch 'stage'
+            branch 'master'
+        }
+    }
+    steps {
+        script {
+            SERVICES.split().each { service ->
+                sh "docker buildx build --platform linux/amd64,linux/arm64 -t ${DOCKERHUB_USER}/${service}:${IMAGE_TAG} --build-arg SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} --push ./${service}"
             }
         }
     }
+}
 
-    stage('Push Docker Images to Docker Hub') {
-        when {
-            anyOf {
-                branch 'develop'
-                branch 'stage'
-                branch 'master'
-            }
-        }
-        steps {
-            withCredentials([string(credentialsId: "${DOCKER_CREDENTIALS_ID}", variable: 'DOCKER_PASS')]) {
-                sh "docker login -u ${DOCKERHUB_USER} -p ${DOCKER_PASS}"
-                script {
-                    SERVICES.split().each { service ->
-                        sh "docker push ${DOCKERHUB_USER}/${service}:${IMAGE_TAG}"
-                    }
-                }
-            }
-        }
-    }
 
 
         stage('SONARQUBE SCAN') {
