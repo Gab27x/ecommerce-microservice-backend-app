@@ -115,34 +115,58 @@ pipeline {
         }
 
 
-        stage('TRIVY SCAN') {
+
+
+
+        stage('Trivy Vulnerability Scan & Report') {
             when { branch 'develop' }
+
+            environment{
+                TRIVY_PATH = '/opt/homebrew/bin'
+            }
             steps {
                 script {
+                    env.PATH = "${TRIVY_PATH}:${env.PATH}"
+
+
+                    def services = [
+                            'api-gateway',
+                            'cloud-config',
+                            'favourite-service',
+                            'order-service',
+                            'payment-service',
+                            'product-service',
+                            'proxy-client',
+                            'service-discovery',
+                            'shipping-service',
+                            'user-service'
+                    ]
+
                     sh "mkdir -p trivy-reports"
 
                     sh '''
-                        curl -L https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl \
-                        -o html.tpl
+                        curl -L https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o html.tpl
                     '''
 
-                    sh '''
-                        docker run --rm \
-                            -v ${PWD}:/repo \
-                            aquasec/trivy:latest fs /repo \
-                            --template "@/repo/html.tpl" \
-                            --exit-code 1 \
-                            --severity HIGH,CRITICAL \
-                            --scanners vulnerability,secret > trivy-reports/report.html || true
-                    '''
+                    services.each { service ->
+                        def reportPath = "trivy-reports/${service}.html"
+
+                        sh"""
+                            trivy image --format template --scanners vuln \\
+                            --template "@html.tpl" \\
+                            --severity HIGH,CRITICAL \\
+                            -o ${reportPath} \\
+                            ${DOCKERHUB_USER}/${service}:${IMAGE_TAG}
+                        """
+                    }
 
                     publishHTML(target: [
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'trivy-reports',
-                        reportFiles: '*.html',
-                        reportName: 'Trivy Scan Report'
+                            allowMissing: true,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'trivy-reports',
+                            reportFiles: '*.html',
+                            reportName: 'Trivy Scan Report'
                     ])
                 }
             }
