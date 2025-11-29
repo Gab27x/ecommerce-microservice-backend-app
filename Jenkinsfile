@@ -154,6 +154,21 @@ pipeline {
 
     post {
 
+        success {
+            script {
+                echo "Pipeline completed successfully for ${env.BRANCH_NAME} branch."
+
+                if (env.BRANCH_NAME == 'master') {
+                    echo 'Production deployment completed successfully!'
+                } else if (env.BRANCH_NAME == 'stage') {
+                    echo 'Staging deployment completed successfully!'
+
+                } else {
+                    echo 'Development tests completed successfully!'
+                }
+            }
+        }
+
     }
 
 
