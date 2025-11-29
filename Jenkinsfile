@@ -5,10 +5,13 @@ pipeline {
     tools {
         maven 'Maven'
         jdk 'Java11'
+
     }
     environment {
         GIT_REPO = 'https://github.com/Gab27x/ecommerce-microservice-backend-app.git'
- 
+        DOCKERHUB_USER = 'Gab27x'
+        SERVICES = 'api-gateway cloud-config favourite-service order-service payment-service product-service proxy-client service-discovery shipping-service user-service'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
     }
 
     stages {
@@ -69,6 +72,45 @@ pipeline {
                 sh "mvn clean package"
             }
         }
+
+
+            stage('Build Docker Images of each service') {
+        when {
+            anyOf {
+                branch 'develop'
+                branch 'stage'
+                branch 'master'
+            }
+        }
+        steps {
+            script {
+                SERVICES.split().each { service ->
+                    sh "docker buildx build --platform linux/amd64,linux/arm64 -t ${DOCKERHUB_USER}/${service}:${IMAGE_TAG} --build-arg SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} --push ./${service}"
+                }
+            }
+        }
+    }
+
+    stage('Push Docker Images to Docker Hub') {
+        when {
+            anyOf {
+                branch 'develop'
+                branch 'stage'
+                branch 'master'
+            }
+        }
+        steps {
+            withCredentials([string(credentialsId: "${DOCKER_CREDENTIALS_ID}", variable: 'DOCKER_PASS')]) {
+                sh "docker login -u ${DOCKERHUB_USER} -p ${DOCKER_PASS}"
+                script {
+                    SERVICES.split().each { service ->
+                        sh "docker push ${DOCKERHUB_USER}/${service}:${IMAGE_TAG}"
+                    }
+                }
+            }
+        }
+    }
+
 
         stage('SONARQUBE SCAN') {
             when { branch 'develop' }
