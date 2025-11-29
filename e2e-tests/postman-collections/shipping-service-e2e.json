@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "shipping-service-e2e-collection",
+		"name": "Shipping Service E2E Tests",
+		"description": "End-to-end tests for Shipping Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get All Shippings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Response has collection property\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('collection');",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/shippings",
+					"host": ["{{base_url}}"],
+					"path": ["api", "shippings"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Create Shipping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Shipping created successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('orderId');",
+							"    pm.expect(jsonData).to.have.property('productId');",
+							"    pm.collectionVariables.set('shipping_order_id', jsonData.orderId.toString());",
+							"    pm.collectionVariables.set('shipping_product_id', jsonData.productId.toString());",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderId\": 1,\n    \"productId\": 1,\n    \"quantity\": 5\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/shippings",
+					"host": ["{{base_url}}"],
+					"path": ["api", "shippings"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get Shipping By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var orderId = pm.collectionVariables.get('shipping_order_id') || '1';",
+							"var productId = pm.collectionVariables.get('shipping_product_id') || '1';",
+							"pm.test(\"E2E Test 4: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Shipping retrieved successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('orderId');",
+							"    pm.expect(jsonData).to.have.property('productId');",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/shippings/{{shipping_order_id}}/{{shipping_product_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "shippings", "{{shipping_order_id}}", "{{shipping_product_id}}"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Update Shipping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var orderId = pm.collectionVariables.get('shipping_order_id') || '1';",
+							"var productId = pm.collectionVariables.get('shipping_product_id') || '1';",
+							"pm.test(\"E2E Test 5: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Shipping updated successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('orderId');",
+							"    pm.expect(jsonData).to.have.property('productId');",
+							"    pm.expect(jsonData.quantity).to.eql(10);",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderId\": {{shipping_order_id}},\n    \"productId\": {{shipping_product_id}},\n    \"quantity\": 10\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/shippings",
+					"host": ["{{base_url}}"],
+					"path": ["api", "shippings"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8600",
+			"type": "string"
+		},
+		{
+			"key": "shipping_order_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "shipping_product_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,218 @@
+{
+	"info": {
+		"_postman_id": "payment-service-e2e-collection",
+		"name": "Payment Service E2E Tests",
+		"description": "End-to-end tests for Payment Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get All Payments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Response is valid JSON\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"        if (jsonData.hasOwnProperty('collection')) {",
+							"            pm.expect(jsonData.collection).to.be.an('array');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Response is not valid JSON');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/payments",
+					"host": ["{{base_url}}"],
+					"path": ["api", "payments"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Create Payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Payment created successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('paymentId');",
+							"        if (jsonData.paymentId) {",
+							"            pm.collectionVariables.set('payment_id', jsonData.paymentId.toString());",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"isPayed\": true,\n    \"paymentStatus\": \"PAID\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/payments",
+					"host": ["{{base_url}}"],
+					"path": ["api", "payments"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get Payment By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var paymentId = pm.collectionVariables.get('payment_id') || '1';",
+							"pm.test(\"E2E Test 4: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Payment retrieved successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('paymentId');",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/payments/{{payment_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "payments", "{{payment_id}}"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Update Payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var paymentId = pm.collectionVariables.get('payment_id') || '1';",
+							"pm.test(\"E2E Test 5: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Payment updated successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('paymentId');",
+							"        if (jsonData.paymentStatus) {",
+							"            pm.expect(jsonData.paymentStatus).to.be.a('string');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"paymentId\": {{payment_id}},\n    \"isPayed\": false,\n    \"paymentStatus\": \"REFUNDED\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/payments",
+					"host": ["{{base_url}}"],
+					"path": ["api", "payments"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8400",
+			"type": "string"
+		},
+		{
+			"key": "payment_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
