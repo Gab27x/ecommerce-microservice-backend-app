@@ -53,7 +53,7 @@ pipeline {
         stage('BUILD AND TEST') {
             when {
                 anyOf {
-                    branch 'devlop'
+                    branch 'develop'
                     branch 'stage'
                     branch 'master'
                 }
