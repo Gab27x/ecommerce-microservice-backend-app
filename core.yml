@@ -7,7 +7,11 @@ services:
       - microservices_network
 
   service-discovery-container:
-    image: selimhorri/service-discovery-ecommerce-boot:0.1.0
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+      args:
+        PROJECT_VERSION: 0.1.0
     platform: linux/amd64
     ports:
       - "8761:8761"
@@ -18,7 +22,11 @@ services:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/
 
   cloud-config-container:
-    image: selimhorri/cloud-config-ecommerce-boot:0.1.0
+    build:
+      context: ./cloud-config
+      dockerfile: Dockerfile
+      args:
+        PROJECT_VERSION: 0.1.0
     platform: linux/amd64
     ports:
       - "9296:9296"
@@ -35,4 +43,4 @@ services:
 networks:
   microservices_network:
     driver: bridge
-    name: microservices_network 
+    name: microservices_network

@@ -1,0 +1,219 @@
+{
+	"info": {
+		"_postman_id": "product-service-e2e-collection",
+		"name": "Product Service E2E Tests",
+		"description": "End-to-end tests for Product Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get All Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Response is valid JSON\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"        if (jsonData.hasOwnProperty('collection')) {",
+							"            pm.expect(jsonData.collection).to.be.an('array');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Response is not valid JSON');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/products",
+					"host": ["{{base_url}}"],
+					"path": ["api", "products"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Create Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Product created successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('productId');",
+							"        pm.expect(jsonData).to.have.property('productTitle');",
+							"        if (jsonData.productTitle) {",
+							"            pm.collectionVariables.set('product_id', jsonData.productId.toString());",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productTitle\": \"E2E Test Product\",\n    \"imageUrl\": \"https://example.com/e2e-test.jpg\",\n    \"sku\": \"SKU-E2E-001\",\n    \"priceUnit\": 99.99,\n    \"quantity\": 10\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/products",
+					"host": ["{{base_url}}"],
+					"path": ["api", "products"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get Product By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var productId = pm.collectionVariables.get('product_id') || '1';",
+							"pm.test(\"E2E Test 4: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Product retrieved successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('productId');",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/products/{{product_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "products", "{{product_id}}"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Update Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var productId = pm.collectionVariables.get('product_id') || '1';",
+							"pm.test(\"E2E Test 5: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Product updated successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('productId');",
+							"        if (jsonData.productTitle) {",
+							"            pm.expect(jsonData.productTitle).to.include('Updated');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{product_id}},\n    \"productTitle\": \"Updated E2E Test Product\",\n    \"imageUrl\": \"https://example.com/e2e-test-updated.jpg\",\n    \"sku\": \"SKU-E2E-001\",\n    \"priceUnit\": 149.99,\n    \"quantity\": 15\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/products",
+					"host": ["{{base_url}}"],
+					"path": ["api", "products"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8500",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

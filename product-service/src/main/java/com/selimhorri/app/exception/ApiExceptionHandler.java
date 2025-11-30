@@ -10,6 +10,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.selimhorri.app.exception.payload.ExceptionMsg;
 import com.selimhorri.app.exception.wrapper.CategoryNotFoundException;
@@ -59,16 +60,16 @@ public class ApiExceptionHandler {
 					.build(), badRequest);
 	}
 	
-	
-	
+	@ExceptionHandler({ NumberFormatException.class, MethodArgumentTypeMismatchException.class })
+	public ResponseEntity<ExceptionMsg> handleNumberFormat(final Exception e) {
+		log.info("**ApiExceptionHandler controller, handle NumberFormat/TypeMismatch*\n");
+		final var badRequest = HttpStatus.BAD_REQUEST;
+		return new ResponseEntity<>(
+				ExceptionMsg.builder()
+					.msg("#### Invalid numeric parameter: " + e.getMessage() + " ####")
+					.httpStatus(badRequest)
+					.timestamp(ZonedDateTime.now(ZoneId.systemDefault()))
+					.build(), badRequest);
+	}
+
 }
-
-
-
-
-
-
-
-
-
-

@@ -13,6 +13,7 @@ import com.selimhorri.app.dto.OrderDto;
 import com.selimhorri.app.dto.PaymentDto;
 import com.selimhorri.app.exception.wrapper.PaymentNotFoundException;
 import com.selimhorri.app.helper.PaymentMappingHelper;
+import com.selimhorri.app.metrics.BusinessMetricsService;
 import com.selimhorri.app.repository.PaymentRepository;
 import com.selimhorri.app.service.PaymentService;
 
@@ -27,6 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	private final PaymentRepository paymentRepository;
 	private final RestTemplate restTemplate;
+	private final BusinessMetricsService businessMetricsService;
 	
 	@Override
 	public List<PaymentDto> findAll() {
@@ -59,15 +61,22 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public PaymentDto save(final PaymentDto paymentDto) {
 		log.info("*** PaymentDto, service; save payment *");
-		return PaymentMappingHelper.map(this.paymentRepository
+		PaymentDto savedPayment = PaymentMappingHelper.map(this.paymentRepository
 				.save(PaymentMappingHelper.map(paymentDto)));
+		// Registrar métricas de negocio: pago creado y por estado
+		businessMetricsService.recordPaymentCreated();
+		businessMetricsService.recordPayment(savedPayment.getPaymentStatus(), savedPayment.getIsPayed());
+		return savedPayment;
 	}
 	
 	@Override
 	public PaymentDto update(final PaymentDto paymentDto) {
 		log.info("*** PaymentDto, service; update payment *");
-		return PaymentMappingHelper.map(this.paymentRepository
+		PaymentDto updatedPayment = PaymentMappingHelper.map(this.paymentRepository
 				.save(PaymentMappingHelper.map(paymentDto)));
+		// Registrar métricas de negocio: pago actualizado y por estado
+		businessMetricsService.recordPayment(updatedPayment.getPaymentStatus(), updatedPayment.getIsPayed());
+		return updatedPayment;
 	}
 	
 	@Override
@@ -79,12 +88,3 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	
 }
-
-
-
-
-
-
-
-
-

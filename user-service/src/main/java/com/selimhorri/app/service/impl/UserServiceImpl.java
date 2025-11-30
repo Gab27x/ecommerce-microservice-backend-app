@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.selimhorri.app.dto.UserDto;
 import com.selimhorri.app.exception.wrapper.UserObjectNotFoundException;
 import com.selimhorri.app.helper.UserMappingHelper;
+import com.selimhorri.app.metrics.BusinessMetricsService;
 import com.selimhorri.app.repository.UserRepository;
 import com.selimhorri.app.service.UserService;
 
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
 	
 	private final UserRepository userRepository;
+	private final BusinessMetricsService businessMetricsService;
 	
 	@Override
 	public List<UserDto> findAll() {
@@ -45,26 +47,41 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto save(final UserDto userDto) {
 		log.info("*** UserDto, service; save user *");
-		return UserMappingHelper.map(this.userRepository.save(UserMappingHelper.map(userDto)));
+		UserDto savedUser = UserMappingHelper.map(this.userRepository.save(UserMappingHelper.map(userDto)));
+		// Registrar métrica de negocio: usuario registrado
+		businessMetricsService.recordUserRegistered();
+		// Actualizar gauge de usuarios activos
+		businessMetricsService.updateActiveUsersGauge(this.userRepository.count());
+		return savedUser;
 	}
 	
 	@Override
 	public UserDto update(final UserDto userDto) {
 		log.info("*** UserDto, service; update user *");
-		return UserMappingHelper.map(this.userRepository.save(UserMappingHelper.map(userDto)));
+		UserDto updatedUser = UserMappingHelper.map(this.userRepository.save(UserMappingHelper.map(userDto)));
+		// Registrar métrica de negocio: usuario actualizado
+		businessMetricsService.recordUserUpdated();
+		return updatedUser;
 	}
 	
 	@Override
 	public UserDto update(final Integer userId, final UserDto userDto) {
 		log.info("*** UserDto, service; update user with userId *");
-		return UserMappingHelper.map(this.userRepository.save(
+		UserDto updatedUser = UserMappingHelper.map(this.userRepository.save(
 				UserMappingHelper.map(this.findById(userId))));
+		// Registrar métrica de negocio: usuario actualizado
+		businessMetricsService.recordUserUpdated();
+		return updatedUser;
 	}
 	
 	@Override
 	public void deleteById(final Integer userId) {
 		log.info("*** Void, service; delete user by id *");
 		this.userRepository.deleteById(userId);
+		// Registrar métrica de negocio: usuario eliminado
+		businessMetricsService.recordUserDeleted();
+		// Actualizar gauge de usuarios activos
+		businessMetricsService.updateActiveUsersGauge(this.userRepository.count());
 	}
 	
 	@Override
