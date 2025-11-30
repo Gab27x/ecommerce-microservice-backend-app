@@ -268,8 +268,8 @@ pipeline {
                         docker run --rm --network ecommerce-test \
                         -v $PWD/tests/locust:/mnt/locust \
                         -w /mnt/locust \
-                        -e GATEWAY_HOST=http://api-gateway:8300 \
-                        -e FAVOURITE_HOST_DIRECT=http://favourite-service:8800 \
+                        -e GATEWAY_HOST=http://api-gateway-container:8080 \
+                        -e FAVOURITE_HOST_DIRECT=http://favourite-service-container:8800 \
                         python:3.11-slim bash -c "\
                             pip install --no-cache-dir -r requirements.txt locust && \
                             locust -f locustfile.py --headless -u 10 -r 2 -t 1m --only-summary --html /mnt/locust/locust-report.html \
@@ -279,6 +279,57 @@ pipeline {
             }
         }
 
+        stage('OWASP ZAP Scan') {
+            when { branch 'stage' }
+            steps {
+                script {
+                    echo '==> Iniciando escaneos con OWASP ZAP'
+
+                    def targets = [
+                            [name: 'order-service', url: 'http://order-service-container:8300/order-service'],
+                            [name: 'payment-service', url: 'http://payment-service-container:8400/payment-service'],
+                            [name: 'product-service', url: 'http://product-service-container:8500/product-service'],
+                            [name: 'shipping-service', url: 'http://shipping-service-container:8600/shipping-service'],
+                            [name: 'user-service', url: 'http://user-service-container:8700/user-service'],
+                            [name: 'favourite-service', url: 'http://favourite-service-container:8800/favourite-service']
+                    ]
+
+                    sh 'mkdir -p zap-reports'
+
+                    targets.each { service ->
+                        def reportFile = "zap-reports/report-${service.name}.html"
+                        echo "==> Escaneando ${service.name} (${service.url})"
+                        sh """
+                            docker run --rm \
+                            --network ecommerce-test \
+                            -v ${env.WORKSPACE}:/zap/wrk \
+                            zaproxy/zap-stable \
+                            zap-baseline.py \
+                            -t ${service.url} \
+                            -r ${reportFile} \
+                            -I
+                        """
+                    }
+                }
+            }
+        }
+
+
+        stage('Publicar Reportes de Seguridad') {
+            when { branch 'stage' }
+            steps {
+                echo '==> Publicando reportes HTML en interfaz Jenkins'
+                publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'zap-reports',
+                        reportFiles: 'report-*.html',
+                        reportName: 'ZAP Security Reports',
+                        reportTitles: 'OWASP ZAP Full Scan Results'
+                ])
+            }
+        }
 
         stage('Build & Push Docker Images') {
             when {
@@ -388,11 +439,18 @@ pipeline {
                 if (env.BRANCH_NAME == 'master') {
                     echo 'Production deployment completed successfully!'
                 } else if (env.BRANCH_NAME == 'stage') {
+                                    sh '''
+                docker rm -f $(docker ps -aq)
+                '''
                     echo 'Staging deployment completed successfully!'
 
                 } else {
+                                    sh '''
+                docker rm -f $(docker ps -aq)
+                '''
                     echo 'Development tests completed successfully!'
                 }
+
             }
         }
         failure {
@@ -402,7 +460,7 @@ pipeline {
                 docker rm -f $(docker ps -aq)
                 '''
 
-             }
+            }
 
 
         }
