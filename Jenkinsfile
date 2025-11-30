@@ -336,7 +336,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'stage'
-                    branch 'master'
+
                 }
             }
             steps {
