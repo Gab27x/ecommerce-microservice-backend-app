@@ -12,6 +12,10 @@ pipeline {
         DOCKERHUB_USER = 'gab27x'
         SERVICES = 'api-gateway cloud-config favourite-service order-service payment-service product-service proxy-client service-discovery shipping-service user-service'
         DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
+        K8S_NAMESPACE = 'microservices'
+
+        AWS_REGION = 'us-east-1'
+        CLUSTER_NAME = 'ecommerce-prod'
     }
 
     stages {
@@ -422,8 +426,129 @@ pipeline {
     }
 
 
+ stage('Configure kubeconfig') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+                    aws eks update-kubeconfig \\
+                        --name ecommerce-prod \\
+                        --region us-east-1 \\
+                        --role-arn arn:aws:iam::393177628930:role/software5 \\
+                        --kubeconfig $PWD/kubeconfig
+                kubectl --kubeconfig $KUBECONFIG get nodes
+                kubectl get pods -A
+            '''
+                }
+            }
+        }
+
+        stage('Create Namespace') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+                aws eks update-kubeconfig \
+                    --name ecommerce-prod \
+                    --region us-east-1 \
+                    --role-arn arn:aws:iam::393177628930:role/software5 \
+                    --kubeconfig $KUBECONFIG
+
+                kubectl get namespace ${K8S_NAMESPACE} || kubectl create namespace ${K8S_NAMESPACE}
+            '''
+                }
+            }
+        }
 
 
+
+
+        stage('Deploy common config for microservices') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+                kubectl apply -f k8s/common-config.yaml -n ${K8S_NAMESPACE}
+            '''
+                }
+            }
+        }
+
+
+        stage('Deploy Core Services') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+
+                kubectl apply -f k8s/zipkin/ -n ${K8S_NAMESPACE}
+                kubectl rollout status deployment/zipkin -n ${K8S_NAMESPACE} --timeout=200s
+
+                kubectl apply -f k8s/service-discovery/ -n ${K8S_NAMESPACE}
+                kubectl set image deployment/service-discovery service-discovery=${DOCKERHUB_USER}/service-discovery:dev -n ${K8S_NAMESPACE}
+                kubectl set env deployment/service-discovery SPRING_PROFILES_ACTIVE=dev -n ${K8S_NAMESPACE}
+                kubectl rollout status deployment/service-discovery -n ${K8S_NAMESPACE} --timeout=200s
+
+                kubectl apply -f k8s/cloud-config/ -n ${K8S_NAMESPACE}
+                kubectl set image deployment/cloud-config cloud-config=${DOCKERHUB_USER}/cloud-config:dev -n ${K8S_NAMESPACE}
+                kubectl set env deployment/cloud-config SPRING_PROFILES_ACTIVE=dev -n ${K8S_NAMESPACE}
+                kubectl rollout status deployment/cloud-config -n ${K8S_NAMESPACE} --timeout=300s
+            '''
+                }
+            }
+        }
+
+        stage('Deploy Ingress') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+
+                kubectl apply -f k8s/ingress.yaml -n ${K8S_NAMESPACE}
+                kubectl get ingress -n ${K8S_NAMESPACE}
+            '''
+                }
+            }
+        }
+
+
+
+        stage('Deploy Microservices') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    script {
+                        sh '''
+                    export KUBECONFIG=$WORKSPACE/kubeconfig
+
+                    aws eks update-kubeconfig \
+                        --name ecommerce-prod \
+                        --region us-east-1 \
+                        --role-arn arn:aws:iam::393177628930:role/software5 \
+                        --kubeconfig $KUBECONFIG
+                '''
+
+                        def appServices = [
+                                'product-service','user-service','order-service','payment-service','favourite-service','shipping-service','proxy-client','api-gateway'
+                        ]
+
+                        for (svc in appServices) {
+                            def image = "${DOCKERHUB_USER}/${svc}:dev"
+
+                            sh "kubectl apply -f k8s/${svc}/ -n ${K8S_NAMESPACE}"
+                            sh "kubectl set image deployment/${svc} ${svc}=${image} -n ${K8S_NAMESPACE}"
+                            sh "kubectl set env deployment/${svc} SPRING_PROFILES_ACTIVE=dev -n ${K8S_NAMESPACE}"
+                            sh "kubectl rollout status deployment/${svc} -n ${K8S_NAMESPACE} --timeout=200s"
+                        }
+                    }
+                }
+            }
+        }
 
 
     post {
