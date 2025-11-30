@@ -154,15 +154,10 @@ pipeline {
 
                     # Iniciar api-gateway-container
                     docker run -d --name api-gateway-container --network microservices_network -p 8080:8080 \
-                    -e SPRING_PROFILES_ACTIVE=dev \
-                    -e SPRING_ZIPKIN_BASE_URL=http://zipkin:9411 \
-                    -e SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296/ \
-                    -e SPRING_CLOUD_CONFIG_URI=http://cloud-config-container:9296 \
-                    -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/ \
-                    -e EUREKA_CLIENT_REGISTER_WITH_EUREKA=true \
-                    -e EUREKA_CLIENT_FETCH_REGISTRY=true \
-                    -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
-                    -e EUREKA_INSTANCE_PREFER_IP_ADDRESS=true \
+                    -e SPRING_PROFILES_ACTIVE=dev \\
+                    -e SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411 \\
+                    -e SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296 \\
+                    -e EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://service-discovery-container:8761/eureka \\
                     -e EUREKA_INSTANCE_HOSTNAME=api-gateway-container \
                     gab27x/api-gateway:dev
 
