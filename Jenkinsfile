@@ -260,7 +260,7 @@ pipeline {
                     mkdir -p locust-reports
 
                     # Ejecutar Locust en un contenedor temporal de Python
-                        docker run --rm --network ecommerce-test \
+                       docker run --rm --network ecommerce-test \
                         -v $PWD/tests/locust:/mnt/locust \
                         -w /mnt/locust \
                         -e GATEWAY_HOST=http://api-gateway-container:8080 \
@@ -269,6 +269,7 @@ pipeline {
                             pip install --no-cache-dir -r requirements.txt locust && \
                             locust -f locustfile.py --headless -u 10 -r 2 -t 1m --only-summary --html /mnt/locust/locust-report.html \
                         "
+
                     '''
                 }
             }
