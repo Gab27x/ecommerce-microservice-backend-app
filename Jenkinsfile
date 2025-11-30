@@ -131,24 +131,30 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([string(credentialsId: "${DOCKER_CREDENTIALS_ID}", variable: 'docker_pwd')]) {
+                script {
 
-                    // Login ANTES de buildx
-                    sh "docker login -u ${DOCKERHUB_USER} -p ${docker_pwd}"
+                    // LOGIN correcto a Docker Hub
+                    withCredentials([usernamePassword(
+                        credentialsId: "${DOCKER_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    }
 
-                    script {
-                        SERVICES.split().each { service ->
-                            sh """
-                                docker buildx build --platform linux/amd64,linux/arm64 \
-                                -t ${DOCKERHUB_USER}/${service}:${IMAGE_TAG} \
-                                --build-arg SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-                                --push ./${service}
-                            """
-                        }
+                    // Build & Push MULTI-SERVICIO correcto
+                    SERVICES.split().each { service ->
+                        sh """
+                            docker buildx build --platform linux/amd64,linux/arm64 \
+                            -t ${DOCKERHUB_USER}/${service}:${IMAGE_TAG} \
+                            --build-arg SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
+                            --push ./${service}
+                        """
                     }
                 }
             }
         }
+
 
 
 
