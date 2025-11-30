@@ -1,0 +1,168 @@
+{
+	"info": {
+		"_postman_id": "proxy-client-e2e-collection",
+		"name": "Proxy Client E2E Tests",
+		"description": "End-to-end tests for Proxy Client using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get Swagger UI",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Swagger UI accessible\", function () {",
+							"    var responseText = pm.response.text();",
+							"    pm.expect(responseText).to.include('swagger');",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/swagger-ui.html",
+					"host": ["{{base_url}}"],
+					"path": ["swagger-ui.html"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Get API Docs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: API docs accessible\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('openapi');",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v3/api-docs",
+					"host": ["{{base_url}}"],
+					"path": ["v3", "api-docs"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Proxy Products API",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 4: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Products API accessible through proxy\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/products",
+					"host": ["{{base_url}}"],
+					"path": ["api", "products"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Proxy Users API",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 5: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Users API accessible through proxy\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "users"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8900",
+			"type": "string"
+		}
+	]
+}

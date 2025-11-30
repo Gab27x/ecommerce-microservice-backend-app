@@ -1,0 +1,205 @@
+{
+	"info": {
+		"_postman_id": "order-service-e2e-collection",
+		"name": "Order Service E2E Tests",
+		"description": "End-to-end tests for Order Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get All Orders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Response is valid JSON\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"        if (jsonData.hasOwnProperty('collection')) {",
+							"            pm.expect(jsonData.collection).to.be.an('array');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Response is not valid JSON');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/orders",
+					"host": ["{{base_url}}"],
+					"path": ["api", "orders"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Create Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Order created successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('orderId');",
+							"    pm.expect(jsonData).to.have.property('orderDesc');",
+							"    pm.expect(jsonData.orderDesc).to.eql('E2E Test Order');",
+							"    pm.collectionVariables.set('order_id', jsonData.orderId.toString());",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderDesc\": \"E2E Test Order\",\n    \"orderFee\": 199.99,\n    \"orderDate\": \"2025-01-01T10:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/orders",
+					"host": ["{{base_url}}"],
+					"path": ["api", "orders"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get Order By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var orderId = pm.collectionVariables.get('order_id') || '1';",
+							"pm.test(\"E2E Test 4: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Order retrieved successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('orderId');",
+							"    pm.expect(jsonData.orderId.toString()).to.eql(orderId);",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/orders/{{order_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "orders", "{{order_id}}"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Update Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var orderId = pm.collectionVariables.get('order_id') || '1';",
+							"pm.test(\"E2E Test 5: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Order updated successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('orderId');",
+							"    pm.expect(jsonData.orderDesc).to.eql('Updated E2E Test Order');",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderId\": {{order_id}},\n    \"orderDesc\": \"Updated E2E Test Order\",\n    \"orderFee\": 299.99,\n    \"orderDate\": \"2025-01-01T10:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/orders",
+					"host": ["{{base_url}}"],
+					"path": ["api", "orders"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8300",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

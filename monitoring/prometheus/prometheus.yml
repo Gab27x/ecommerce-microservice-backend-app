@@ -1,0 +1,113 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'ecommerce-microservices'
+    environment: 'development'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway-container:8080']
+        labels:
+          service: 'api-gateway'
+          application: 'API-GATEWAY'
+
+  # Proxy Client
+  - job_name: 'proxy-client'
+    metrics_path: '/app/actuator/prometheus'
+    static_configs:
+      - targets: ['proxy-client-container:8900']
+        labels:
+          service: 'proxy-client'
+          application: 'PROXY-CLIENT'
+
+  # User Service
+  - job_name: 'user-service'
+    metrics_path: '/user-service/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service-container:8700']
+        labels:
+          service: 'user-service'
+          application: 'USER-SERVICE'
+
+  # Product Service
+  - job_name: 'product-service'
+    metrics_path: '/product-service/actuator/prometheus'
+    static_configs:
+      - targets: ['product-service-container:8500']
+        labels:
+          service: 'product-service'
+          application: 'PRODUCT-SERVICE'
+
+  # Order Service
+  - job_name: 'order-service'
+    metrics_path: '/order-service/actuator/prometheus'
+    static_configs:
+      - targets: ['order-service-container:8300']
+        labels:
+          service: 'order-service'
+          application: 'ORDER-SERVICE'
+
+  # Payment Service
+  - job_name: 'payment-service'
+    metrics_path: '/payment-service/actuator/prometheus'
+    static_configs:
+      - targets: ['payment-service-container:8400']
+        labels:
+          service: 'payment-service'
+          application: 'PAYMENT-SERVICE'
+
+  # Shipping Service
+  - job_name: 'shipping-service'
+    metrics_path: '/shipping-service/actuator/prometheus'
+    static_configs:
+      - targets: ['shipping-service-container:8600']
+        labels:
+          service: 'shipping-service'
+          application: 'SHIPPING-SERVICE'
+
+  # Favourite Service
+  - job_name: 'favourite-service'
+    metrics_path: '/favourite-service/actuator/prometheus'
+    static_configs:
+      - targets: ['favourite-service-container:8800']
+        labels:
+          service: 'favourite-service'
+          application: 'FAVOURITE-SERVICE'
+
+  # Service Discovery (Eureka)
+  - job_name: 'service-discovery'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-discovery-container:8761']
+        labels:
+          service: 'service-discovery'
+          application: 'SERVICE-DISCOVERY'
+
+  # Cloud Config
+  - job_name: 'cloud-config'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['cloud-config-container:9296']
+        labels:
+          service: 'cloud-config'
+          application: 'CLOUD-CONFIG'
+

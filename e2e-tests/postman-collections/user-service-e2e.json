@@ -1,0 +1,219 @@
+{
+	"info": {
+		"_postman_id": "user-service-e2e-collection",
+		"name": "User Service E2E Tests",
+		"description": "End-to-end tests for User Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get All Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Response is valid JSON\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"        if (jsonData.hasOwnProperty('collection')) {",
+							"            pm.expect(jsonData.collection).to.be.an('array');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Response is not valid JSON');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "users"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: User created successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('userId');",
+							"        pm.expect(jsonData).to.have.property('firstName');",
+							"        if (jsonData.firstName) {",
+							"            pm.collectionVariables.set('user_id', jsonData.userId.toString());",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"E2E Test User\",\n    \"lastName\": \"Doe\",\n    \"email\": \"e2e.test@example.com\",\n    \"phone\": \"+1234567890\",\n    \"imageUrl\": \"https://example.com/e2e-avatar.jpg\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "users"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get User By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var userId = pm.collectionVariables.get('user_id') || '1';",
+							"pm.test(\"E2E Test 4: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: User retrieved successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('userId');",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/users/{{user_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "users", "{{user_id}}"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Update User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var userId = pm.collectionVariables.get('user_id') || '1';",
+							"pm.test(\"E2E Test 5: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: User updated successfully\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('userId');",
+							"        if (jsonData.firstName) {",
+							"            pm.expect(jsonData.firstName).to.include('Updated');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Invalid response format');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{user_id}},\n    \"firstName\": \"Updated E2E Test User\",\n    \"lastName\": \"Doe Updated\",\n    \"email\": \"e2e.test.updated@example.com\",\n    \"phone\": \"+1234567890\",\n    \"imageUrl\": \"https://example.com/e2e-avatar-updated.jpg\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "users"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8700",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

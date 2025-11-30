@@ -1,14 +1,17 @@
-
-FROM openjdk:11
+FROM eclipse-temurin:11-jre
 ARG PROJECT_VERSION=0.1.0
+
+RUN mkdir -p /home/app
 WORKDIR /home/app
 
-
-COPY target/order-service-v${PROJECT_VERSION}.jar order-service.jar
-
 ENV SPRING_PROFILES_ACTIVE dev
+
+# Copia todo desde el contexto ./order-service
+COPY . .
+
+# Agrega el JAR generado por Maven
+ADD target/order-service-v${PROJECT_VERSION}.jar order-service.jar
+
 EXPOSE 8300
 
 ENTRYPOINT ["java", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}", "-jar", "order-service.jar"]
-
-

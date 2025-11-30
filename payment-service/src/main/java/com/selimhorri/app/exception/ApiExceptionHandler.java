@@ -10,6 +10,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.selimhorri.app.exception.payload.ExceptionMsg;
 import com.selimhorri.app.exception.wrapper.PaymentNotFoundException;
@@ -24,50 +25,40 @@ public class ApiExceptionHandler {
 	
 	@ExceptionHandler(value = {
 		MethodArgumentNotValidException.class,
-		HttpMessageNotReadableException.class,
+		HttpMessageNotReadableException.class
 	})
 	public <T extends BindException> ResponseEntity<ExceptionMsg> handleValidationException(final T e) {
-		
 		log.info("**ApiExceptionHandler controller, handle validation exception*\n");
 		final var badRequest = HttpStatus.BAD_REQUEST;
-		
 		return new ResponseEntity<>(
 				ExceptionMsg.builder()
 					.msg("*" + e.getBindingResult().getFieldError().getDefaultMessage() + "!**")
 					.httpStatus(badRequest)
-					.timestamp(ZonedDateTime
-							.now(ZoneId.systemDefault()))
+					.timestamp(ZonedDateTime.now(ZoneId.systemDefault()))
 					.build(), badRequest);
 	}
 	
-	@ExceptionHandler(value = {
-		IllegalStateException.class,
-		PaymentNotFoundException.class,
-	})
+	@ExceptionHandler(value = { PaymentNotFoundException.class })
 	public <T extends RuntimeException> ResponseEntity<ExceptionMsg> handleApiRequestException(final T e) {
-		
 		log.info("**ApiExceptionHandler controller, handle API request*\n");
 		final var badRequest = HttpStatus.BAD_REQUEST;
-		
 		return new ResponseEntity<>(
 				ExceptionMsg.builder()
 					.msg("#### " + e.getMessage() + "! ####")
 					.httpStatus(badRequest)
-					.timestamp(ZonedDateTime
-							.now(ZoneId.systemDefault()))
+					.timestamp(ZonedDateTime.now(ZoneId.systemDefault()))
 					.build(), badRequest);
 	}
-	
-	
-	
+
+	@ExceptionHandler({ NumberFormatException.class, MethodArgumentTypeMismatchException.class })
+	public ResponseEntity<ExceptionMsg> handleNumberFormat(final Exception e) {
+		log.info("**ApiExceptionHandler controller, handle NumberFormat/TypeMismatch*\n");
+		final var badRequest = HttpStatus.BAD_REQUEST;
+		return new ResponseEntity<>(
+				ExceptionMsg.builder()
+					.msg("#### Invalid numeric parameter: " + e.getMessage() + " ####")
+					.httpStatus(badRequest)
+					.timestamp(ZonedDateTime.now(ZoneId.systemDefault()))
+					.build(), badRequest);
+	}
 }
-
-
-
-
-
-
-
-
-
-

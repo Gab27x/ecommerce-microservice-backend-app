@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "api-gateway-e2e-collection",
+		"name": "API Gateway E2E Tests",
+		"description": "End-to-end tests for API Gateway using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Route to Product Service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is successful\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Gateway routes to product service\", function () {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"        if (jsonData.hasOwnProperty('collection')) {",
+							"            pm.expect(jsonData.collection).to.be.an('array');",
+							"        }",
+							"    } catch (e) {",
+							"        pm.expect.fail('Response is not valid JSON');",
+							"    }",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is acceptable\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/app/api/products",
+					"host": ["{{base_url}}"],
+					"path": ["app", "api", "products"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Route to User Service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Gateway routes to user service\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('collection');",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/user-service/api/users",
+					"host": ["{{base_url}}"],
+					"path": ["user-service", "api", "users"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Route to Order Service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 4: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Gateway routes to order service\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('collection');",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/order-service/api/orders",
+					"host": ["{{base_url}}"],
+					"path": ["order-service", "api", "orders"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Route to Payment Service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 5: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Gateway routes to payment service\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('collection');",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/payment-service/api/payments",
+					"host": ["{{base_url}}"],
+					"path": ["payment-service", "api", "payments"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

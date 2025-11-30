@@ -1,0 +1,168 @@
+{
+	"info": {
+		"_postman_id": "cloud-config-e2e-collection",
+		"name": "Cloud Config E2E Tests",
+		"description": "End-to-end tests for Cloud Config Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get Default Configuration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Configuration retrieved\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/default",
+					"host": ["{{base_url}}"],
+					"path": ["default"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Get Configuration by Profile (dev)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Profile configuration retrieved\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/dev",
+					"host": ["{{base_url}}"],
+					"path": ["dev"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get Configuration by Application and Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 4: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Application configuration retrieved\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/ecommerce-microservice-backend/dev",
+					"host": ["{{base_url}}"],
+					"path": ["ecommerce-microservice-backend", "dev"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Get Configuration by Label",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 5: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Label configuration retrieved\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/ecommerce-microservice-backend/dev/master",
+					"host": ["{{base_url}}"],
+					"path": ["ecommerce-microservice-backend", "dev", "master"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:9296",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,23 @@
+server:
+  port: 0
+  servlet:
+    context-path: /user-service
+
+spring:
+  application:
+    name: USER-SERVICE
+  profiles:
+    active: test
+  cloud:
+    config:
+      enabled: false
+  config:
+    # Neutraliza completamente los imports durante tests
+    import: "optional:"
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+

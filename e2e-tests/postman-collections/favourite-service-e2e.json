@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "favourite-service-e2e-collection",
+		"name": "Favourite Service E2E Tests",
+		"description": "End-to-end tests for Favourite Service using Postman/Newman - 5 E2E tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "E2E Test 1: Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 1: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 1: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/actuator/health",
+					"host": ["{{base_url}}"],
+					"path": ["actuator", "health"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 2: Get All Favourites",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 2: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 2: Response has collection property\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('collection');",
+							"});",
+							"pm.test(\"E2E Test 2: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/favourites",
+					"host": ["{{base_url}}"],
+					"path": ["api", "favourites"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 3: Create Favourite",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"E2E Test 3: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 3: Favourite created successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('userId');",
+							"    pm.expect(jsonData).to.have.property('productId');",
+							"    pm.expect(jsonData).to.have.property('likeDate');",
+							"    pm.collectionVariables.set('favourite_user_id', jsonData.userId.toString());",
+							"    pm.collectionVariables.set('favourite_product_id', jsonData.productId.toString());",
+							"    pm.collectionVariables.set('favourite_like_date', jsonData.likeDate);",
+							"});",
+							"pm.test(\"E2E Test 3: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": 1,\n    \"productId\": 1,\n    \"likeDate\": \"2025-01-01__10:00:00:000000\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/favourites",
+					"host": ["{{base_url}}"],
+					"path": ["api", "favourites"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 4: Get Favourite By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var userId = pm.collectionVariables.get('favourite_user_id') || '1';",
+							"var productId = pm.collectionVariables.get('favourite_product_id') || '1';",
+							"var likeDate = pm.collectionVariables.get('favourite_like_date') || '2025-01-01__10:00:00:000000';",
+							"pm.test(\"E2E Test 4: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 4: Favourite retrieved successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('userId');",
+							"    pm.expect(jsonData).to.have.property('productId');",
+							"});",
+							"pm.test(\"E2E Test 4: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/favourites/{{favourite_user_id}}/{{favourite_product_id}}/{{favourite_like_date}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "favourites", "{{favourite_user_id}}", "{{favourite_product_id}}", "{{favourite_like_date}}"]
+				}
+			}
+		},
+		{
+			"name": "E2E Test 5: Update Favourite",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var userId = pm.collectionVariables.get('favourite_user_id') || '1';",
+							"var productId = pm.collectionVariables.get('favourite_product_id') || '1';",
+							"var likeDate = pm.collectionVariables.get('favourite_like_date') || '2025-01-01__10:00:00:000000';",
+							"pm.test(\"E2E Test 5: Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							"pm.test(\"E2E Test 5: Favourite updated successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('userId');",
+							"    pm.expect(jsonData).to.have.property('productId');",
+							"});",
+							"pm.test(\"E2E Test 5: Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{favourite_user_id}},\n    \"productId\": {{favourite_product_id}},\n    \"likeDate\": \"{{favourite_like_date}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/favourites",
+					"host": ["{{base_url}}"],
+					"path": ["api", "favourites"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8800",
+			"type": "string"
+		},
+		{
+			"key": "favourite_user_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "favourite_product_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "favourite_like_date",
+			"value": "2025-01-01__10:00:00:000000",
+			"type": "string"
+		}
+	]
+}

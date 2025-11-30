@@ -1,0 +1,168 @@
+groups:
+  - name: microservices_critical
+    interval: 30s
+    rules:
+      # Alerta: Servicio caído
+      - alert: ServiceDown
+        expr: up{job=~"(api-gateway|proxy-client|user-service|product-service|order-service|payment-service|shipping-service|favourite-service|service-discovery|cloud-config)"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: availability
+        annotations:
+          summary: "Servicio {{ $labels.job }} está caído"
+          description: "El servicio {{ $labels.job }} no está respondiendo desde hace más de 1 minuto."
+
+      # Alerta: Alta latencia (p99 > 1 segundo)
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(http_server_requests_seconds_bucket[5m])) by (le, application)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Alta latencia en {{ $labels.application }}"
+          description: "El percentil 99 de latencia en {{ $labels.application }} es {{ $value }}s (umbral: 1s)"
+
+      # Alerta: Alta tasa de errores 5xx
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (application)
+            /
+            sum(rate(http_server_requests_seconds_count[5m])) by (application)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: reliability
+        annotations:
+          summary: "Alta tasa de errores en {{ $labels.application }}"
+          description: "{{ $labels.application }} tiene {{ $value | humanizePercentage }} de errores 5xx (umbral: 5%)"
+
+      # Alerta: Circuit Breaker abierto
+      - alert: CircuitBreakerOpen
+        expr: resilience4j_circuitbreaker_state{state="open"} == 1
+        for: 2m
+        labels:
+          severity: critical
+          component: resilience
+        annotations:
+          summary: "Circuit Breaker abierto en {{ $labels.name }}"
+          description: "El circuit breaker {{ $labels.name }} está en estado OPEN desde hace más de 2 minutos."
+
+      # Alerta: Circuit Breaker en Half-Open por mucho tiempo
+      - alert: CircuitBreakerHalfOpen
+        expr: resilience4j_circuitbreaker_state{state="half_open"} == 1
+        for: 5m
+        labels:
+          severity: warning
+          component: resilience
+        annotations:
+          summary: "Circuit Breaker en Half-Open en {{ $labels.name }}"
+          description: "El circuit breaker {{ $labels.name }} está en estado HALF_OPEN desde hace más de 5 minutos."
+
+      # Alerta: Alta tasa de retry
+      - alert: HighRetryRate
+        expr: |
+          (
+            sum(rate(resilience4j_retry_calls_total{kind="retry"}[5m])) by (name)
+            /
+            sum(rate(resilience4j_retry_calls_total[5m])) by (name)
+          ) > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          component: resilience
+        annotations:
+          summary: "Alta tasa de retry en {{ $labels.name }}"
+          description: "{{ $labels.name }} tiene {{ $value | humanizePercentage }} de llamadas con retry (umbral: 30%)"
+
+  - name: infrastructure_critical
+    interval: 30s
+    rules:
+      # Alerta: Uso alto de memoria JVM
+      - alert: HighJvmMemoryUsage
+        expr: |
+          (
+            sum(jvm_memory_used_bytes{area="heap"}) by (application)
+            /
+            sum(jvm_memory_max_bytes{area="heap"}) by (application)
+          ) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Uso alto de memoria JVM en {{ $labels.application }}"
+          description: "{{ $labels.application }} está usando {{ $value | humanizePercentage }} de memoria heap (umbral: 85%)"
+
+      # Alerta: Uso alto de CPU
+      - alert: HighCpuUsage
+        expr: |
+          sum(rate(process_cpu_usage[5m])) by (application) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Uso alto de CPU en {{ $labels.application }}"
+          description: "{{ $labels.application }} está usando {{ $value | humanizePercentage }} de CPU (umbral: 80%)"
+
+      # Alerta: Muchas pausas de GC
+      - alert: HighGcPauseTime
+        expr: |
+          sum(rate(jvm_gc_pause_seconds_sum[5m])) by (application) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Alto tiempo de pausa GC en {{ $labels.application }}"
+          description: "{{ $labels.application }} tiene {{ $value }}s de pausa GC por segundo (umbral: 0.1s/s)"
+
+      # Alerta: Prometheus no puede scrapear
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: "Prometheus no puede scrapear {{ $labels.job }}"
+          description: "El target {{ $labels.job }} no está disponible para scraping."
+
+  - name: business_critical
+    interval: 1m
+    rules:
+      # Alerta: Sin solicitudes HTTP (posible problema)
+      - alert: NoHttpRequests
+        expr: |
+          sum(rate(http_server_requests_seconds_count[10m])) by (application) == 0
+        for: 10m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Sin solicitudes HTTP en {{ $labels.application }}"
+          description: "{{ $labels.application }} no ha recibido solicitudes HTTP en los últimos 10 minutos."
+
+      # Alerta: Tasa de éxito baja
+      - alert: LowSuccessRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"2.."}[5m])) by (application)
+            /
+            sum(rate(http_server_requests_seconds_count[5m])) by (application)
+          ) < 0.9
+        for: 5m
+        labels:
+          severity: critical
+          component: business
+        annotations:
+          summary: "Tasa de éxito baja en {{ $labels.application }}"
+          description: "{{ $labels.application }} tiene solo {{ $value | humanizePercentage }} de éxito (umbral: 90%)"
+
