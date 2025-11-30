@@ -2,10 +2,10 @@ from locust import HttpUser, task, between
 import os
 
 
-GATEWAY_HOST = os.getenv("BASE_HOST", "http://localhost:8080")
+GATEWAY_HOST = os.getenv("GATEWAY_HOST", "http://localhost:8080")
 
 
-FAVOURITE_HOST_DIRECT = os.getenv("FAVOURITE_DIRECT_HOST", "http://localhost:8800")
+FAVOURITE_HOST_DIRECT = os.getenv("FAVOURITE_HOST_DIRECT", "http://localhost:8800")
 
 # URLs que utilizan el Gateway (8080)
 PRODUCT_URL = f"{GATEWAY_HOST}/product-service/api/products"
