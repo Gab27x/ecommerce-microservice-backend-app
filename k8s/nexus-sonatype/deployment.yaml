@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonatype-registry
+  labels:
+    app: sonatype-registry
+  namespace: artifact
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonatype-registry
+  template:
+    metadata:
+      labels:
+        app: sonatype-registry
+    spec:
+      securityContext:
+        fsGroup: 200
+      volumes:
+        - name: registry-vol
+          persistentVolumeClaim:
+            claimName: sonatype-registry-data
+      containers:
+        - image: sonatype/nexus3:3.68.1
+          name: nexus
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: registry-vol
+              mountPath: /nexus-data
+              subPath: sonatype
+          securityContext:
+            runAsUser: 200
+            runAsGroup: 200
