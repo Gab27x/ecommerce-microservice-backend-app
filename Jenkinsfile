@@ -423,10 +423,7 @@ pipeline {
         }
 
 
-    }
-
-
- stage('Configure kubeconfig') {
+    stage('Configure kubeconfig') {
             when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
@@ -549,6 +546,11 @@ pipeline {
                 }
             }
         }
+
+
+    }
+
+
 
 
     post {
