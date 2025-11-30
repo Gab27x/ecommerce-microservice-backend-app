@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-client
+  namespace: microservices
+  labels:
+    app: proxy-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy-client
+  template:
+    metadata:
+      labels:
+        app: proxy-client
+    spec:
+      containers:
+        - name: proxy-client
+          image: gab27x/proxy-client:dev
+          ports:
+            - containerPort: 8900
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            - name: SPRING_APPLICATION_NAME
+              value: "PROXY-CLIENT"
+            - name: SERVER_PORT
+              value: "8900"
+            - name: SERVER_SERVLET_CONTEXT_PATH
+              value: "/proxy-client"
+
+            # Servicios externos
+            - name: SPRING_ZIPKIN_BASE_URL
+              value: "http://zipkin-service:9411"
+            - name: SPRING_CONFIG_IMPORT
+              value: "optional:configserver:http://cloud-config:9296"
+
+            # Eureka - Variables correctas según Cloud Config
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://service-discovery:8761/eureka/"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+
+          livenessProbe:
+            httpGet:
+              path: /proxy-client/actuator/health/liveness
+              port: 8900
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /proxy-client/actuator/health/readiness
+              port: 8900
+            initialDelaySeconds: 90
+            periodSeconds: 5
+            failureThreshold: 3
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: common-config-volume
+              mountPath: /app/config
+      volumes:
+        - name: common-config-volume
+          configMap:
+            name: common-config

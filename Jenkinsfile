@@ -12,6 +12,10 @@ pipeline {
         DOCKERHUB_USER = 'gab27x'
         SERVICES = 'api-gateway cloud-config favourite-service order-service payment-service product-service proxy-client service-discovery shipping-service user-service'
         DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
+        K8S_NAMESPACE = 'microservices'
+
+        AWS_REGION = 'us-east-1'
+        CLUSTER_NAME = 'ecommerce-prod'
     }
 
     stages {
@@ -152,6 +156,21 @@ pipeline {
                         sleep 10
                     done
 
+                    # Iniciar api-gateway-container
+                    docker run -d --name api-gateway-container --network microservices_network -p 8080:8080 \
+                    -e SPRING_PROFILES_ACTIVE=dev \\
+                    -e SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411 \\
+                    -e SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296 \\
+                    -e EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://service-discovery-container:8761/eureka \\
+                    -e EUREKA_INSTANCE_HOSTNAME=api-gateway-container \
+                    gab27x/api-gateway:dev
+
+                    # Esperar a que api-gateway esté listo
+                    until curl -s http://localhost:8080/actuator/health | grep '"status":"UP"' > /dev/null; do
+                        echo "Waiting for API Gateway to be ready..."
+                        sleep 10
+                    done
+
                     docker run -d --name order-service-container --network ecommerce-test -p 8300:8300 \\
                     -e SPRING_PROFILES_ACTIVE=dev \\
                     -e SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411 \\
@@ -245,19 +264,72 @@ pipeline {
                     mkdir -p locust-reports
 
                     # Ejecutar Locust en un contenedor temporal de Python
-                    docker run --rm --network ecommerce-test \
+                       docker run --rm --network ecommerce-test \
                         -v $PWD/tests/locust:/mnt/locust \
                         -w /mnt/locust \
+                        -e GATEWAY_HOST=http://api-gateway-container:8080 \
+                        -e FAVOURITE_HOST_DIRECT=http://favourite-service-container:8800 \
                         python:3.11-slim bash -c "\
                             pip install --no-cache-dir -r requirements.txt locust && \
-                            locust -f locustfile.py --headless -u 10 -r 2 -t 1m \
-                            --only-summary --html /mnt/locust/locust-report.html \
+                            locust -f locustfile.py --headless -u 10 -r 2 -t 1m --only-summary --html /mnt/locust/locust-report.html \
                         "
+
                     '''
                 }
             }
         }
 
+        stage('OWASP ZAP Scan') {
+            when { branch 'stage' }
+            steps {
+                script {
+                    echo '==> Iniciando escaneos con OWASP ZAP'
+
+                    def targets = [
+                            [name: 'order-service', url: 'http://order-service-container:8300/order-service'],
+                            [name: 'payment-service', url: 'http://payment-service-container:8400/payment-service'],
+                            [name: 'product-service', url: 'http://product-service-container:8500/product-service'],
+                            [name: 'shipping-service', url: 'http://shipping-service-container:8600/shipping-service'],
+                            [name: 'user-service', url: 'http://user-service-container:8700/user-service'],
+                            [name: 'favourite-service', url: 'http://favourite-service-container:8800/favourite-service']
+                    ]
+
+                    sh 'mkdir -p zap-reports'
+
+                    targets.each { service ->
+                        def reportFile = "zap-reports/report-${service.name}.html"
+                        echo "==> Escaneando ${service.name} (${service.url})"
+                        sh """
+                            docker run --rm \
+                            --network ecommerce-test \
+                            -v ${env.WORKSPACE}:/zap/wrk \
+                            zaproxy/zap-stable \
+                            zap-baseline.py \
+                            -t ${service.url} \
+                            -r ${reportFile} \
+                            -I
+                        """
+                    }
+                }
+            }
+        }
+
+
+        stage('Publicar Reportes de Seguridad') {
+            when { branch 'stage' }
+            steps {
+                echo '==> Publicando reportes HTML en interfaz Jenkins'
+                publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'zap-reports',
+                        reportFiles: 'report-*.html',
+                        reportName: 'ZAP Security Reports',
+                        reportTitles: 'OWASP ZAP Full Scan Results'
+                ])
+            }
+        }
 
         stage('Build & Push Docker Images') {
             when {
@@ -354,8 +426,129 @@ pipeline {
     }
 
 
+ stage('Configure kubeconfig') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+                    aws eks update-kubeconfig \\
+                        --name ecommerce-prod \\
+                        --region us-east-1 \\
+                        --role-arn arn:aws:iam::393177628930:role/software5 \\
+                        --kubeconfig $PWD/kubeconfig
+                kubectl --kubeconfig $KUBECONFIG get nodes
+                kubectl get pods -A
+            '''
+                }
+            }
+        }
+
+        stage('Create Namespace') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+                aws eks update-kubeconfig \
+                    --name ecommerce-prod \
+                    --region us-east-1 \
+                    --role-arn arn:aws:iam::393177628930:role/software5 \
+                    --kubeconfig $KUBECONFIG
+
+                kubectl get namespace ${K8S_NAMESPACE} || kubectl create namespace ${K8S_NAMESPACE}
+            '''
+                }
+            }
+        }
 
 
+
+
+        stage('Deploy common config for microservices') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+                kubectl apply -f k8s/common-config.yaml -n ${K8S_NAMESPACE}
+            '''
+                }
+            }
+        }
+
+
+        stage('Deploy Core Services') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+
+                kubectl apply -f k8s/zipkin/ -n ${K8S_NAMESPACE}
+                kubectl rollout status deployment/zipkin -n ${K8S_NAMESPACE} --timeout=200s
+
+                kubectl apply -f k8s/service-discovery/ -n ${K8S_NAMESPACE}
+                kubectl set image deployment/service-discovery service-discovery=${DOCKERHUB_USER}/service-discovery:dev -n ${K8S_NAMESPACE}
+                kubectl set env deployment/service-discovery SPRING_PROFILES_ACTIVE=dev -n ${K8S_NAMESPACE}
+                kubectl rollout status deployment/service-discovery -n ${K8S_NAMESPACE} --timeout=200s
+
+                kubectl apply -f k8s/cloud-config/ -n ${K8S_NAMESPACE}
+                kubectl set image deployment/cloud-config cloud-config=${DOCKERHUB_USER}/cloud-config:dev -n ${K8S_NAMESPACE}
+                kubectl set env deployment/cloud-config SPRING_PROFILES_ACTIVE=dev -n ${K8S_NAMESPACE}
+                kubectl rollout status deployment/cloud-config -n ${K8S_NAMESPACE} --timeout=300s
+            '''
+                }
+            }
+        }
+
+        stage('Deploy Ingress') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    sh '''
+                export KUBECONFIG=$WORKSPACE/kubeconfig
+
+                kubectl apply -f k8s/ingress.yaml -n ${K8S_NAMESPACE}
+                kubectl get ingress -n ${K8S_NAMESPACE}
+            '''
+                }
+            }
+        }
+
+
+
+        stage('Deploy Microservices') {
+            when { branch 'master' }
+            steps {
+                withAWS(credentials: 'aws-cred', region: 'us-east-1') {
+                    script {
+                        sh '''
+                    export KUBECONFIG=$WORKSPACE/kubeconfig
+
+                    aws eks update-kubeconfig \
+                        --name ecommerce-prod \
+                        --region us-east-1 \
+                        --role-arn arn:aws:iam::393177628930:role/software5 \
+                        --kubeconfig $KUBECONFIG
+                '''
+
+                        def appServices = [
+                                'product-service','user-service','order-service','payment-service','favourite-service','shipping-service','proxy-client','api-gateway'
+                        ]
+
+                        for (svc in appServices) {
+                            def image = "${DOCKERHUB_USER}/${svc}:dev"
+
+                            sh "kubectl apply -f k8s/${svc}/ -n ${K8S_NAMESPACE}"
+                            sh "kubectl set image deployment/${svc} ${svc}=${image} -n ${K8S_NAMESPACE}"
+                            sh "kubectl set env deployment/${svc} SPRING_PROFILES_ACTIVE=dev -n ${K8S_NAMESPACE}"
+                            sh "kubectl rollout status deployment/${svc} -n ${K8S_NAMESPACE} --timeout=200s"
+                        }
+                    }
+                }
+            }
+        }
 
 
     post {
@@ -367,13 +560,33 @@ pipeline {
                 if (env.BRANCH_NAME == 'master') {
                     echo 'Production deployment completed successfully!'
                 } else if (env.BRANCH_NAME == 'stage') {
+                                    sh '''
+                docker rm -f $(docker ps -aq)
+                '''
                     echo 'Staging deployment completed successfully!'
 
                 } else {
+                                    sh '''
+                docker rm -f $(docker ps -aq)
+                '''
                     echo 'Development tests completed successfully!'
                 }
+
             }
         }
+        failure {
+
+             script {
+                sh '''
+                docker rm -f $(docker ps -aq)
+                '''
+
+            }
+
+
+        }
+
+
 
     }
 
