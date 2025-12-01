@@ -179,10 +179,11 @@ pipeline {
                     -e EUREKA_INSTANCE=order-service-container \\
                     gab27x/order-service:dev
 
-                    until [ "$(curl -s http://localhost:8300/order-service/actuator/health | jq -r '.status')" = "UP" ]; do
-                        echo "Waiting for order service to be ready..."
+                    until [ "$(curl -s http://localhost:8080/actuator/health | jq -r '.status')" = "UP" ]; do
+                        echo "Waiting for API Gateway to be ready..."
                         sleep 10
                     done
+
 
                     docker run -d --name payment-service-container --network ecommerce-test -p 8400:8400 \\
                     -e SPRING_PROFILES_ACTIVE=dev \\
