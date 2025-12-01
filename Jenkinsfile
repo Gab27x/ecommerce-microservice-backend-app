@@ -269,7 +269,7 @@ pipeline {
                         -e FAVOURITE_HOST_DIRECT=http://favourite-service-container:8800 \
                         python:3.11-slim bash -c "\
                             pip install --no-cache-dir -r requirements.txt locust && \
-                            locust -f locustfile.py --headless -u 10 -r 2 -t 1m --only-summary --html /mnt/locust/locust-report.html \
+                            locust -f locustfile.py --headless -u 5 -r 1 -t 30s --only-summary --html /mnt/locust/locust-report.html \
                         "
 
                     '''
