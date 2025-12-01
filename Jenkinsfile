@@ -438,6 +438,49 @@ pipeline {
         }
 
 
+        stage('Upload Artifacts') {
+        when { branch 'master' }
+        steps {
+            script {
+                def services = [
+                    'api-gateway',
+                    'cloud-config',
+                    'favourite-service',
+                    'order-service',
+                    'payment-service',
+                    'product-service',
+                    'proxy-client',
+                    'service-discovery',
+                    'shipping-service',
+                    'user-service'
+                ]
+
+                def version = "${env.BUILD_ID}-${new Date().format('yyyyMMdd-HHmmss')}"
+
+                def artifacts = services.collect { service ->
+                    [
+                        artifactId: service,
+                        classifier: '',
+                        file: "${service}/target/${service}-v0.1.0.jar",
+                        type: 'jar'
+                    ]
+                }
+
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: 'http://localhost:8081',
+                    groupId: 'com.ecommerce',
+                    version: version,
+                    repository: 'ecommerce-app',
+                    credentialsId: 'nexusLogin',
+                    artifacts: artifacts
+                )
+            }
+        }
+    }
+
+
     stage('Configure kubeconfig') {
             when { branch 'master' }
             steps {
