@@ -439,7 +439,7 @@ pipeline {
 
 
         stage('Upload Artifacts') {
-        when { branch 'master2' }
+        when { branch 'master' }
         steps {
             script {
                 def services = [
