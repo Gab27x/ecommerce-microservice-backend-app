@@ -482,7 +482,7 @@ pipeline {
 
 
     stage('Configure kubeconfig') {
-            when { branch 'master' }
+            when { branch 'master2' }
             steps {
                 withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
                     sh '''
@@ -500,7 +500,7 @@ pipeline {
         }
 
         stage('Create Namespace') {
-            when { branch 'master' }
+            when { branch 'master2' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -521,7 +521,7 @@ pipeline {
 
 
         stage('Deploy common config for microservices') {
-            when { branch 'master' }
+            when { branch 'master2' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -534,7 +534,7 @@ pipeline {
 
 
         stage('Deploy Core Services') {
-            when { branch 'master' }
+            when { branch 'master2' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -558,7 +558,7 @@ pipeline {
         }
 
         stage('Deploy Ingress') {
-            when { branch 'master' }
+            when { branch 'master2' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -574,7 +574,7 @@ pipeline {
 
 
         stage('Deploy Microservices') {
-            when { branch 'master' }
+            when { branch 'master2' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     script {
