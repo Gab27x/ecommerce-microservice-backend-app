@@ -769,6 +769,12 @@ pipeline {
             }
         }
         failure {
+             emailext(
+                    attachLog: true,
+                    body: '$DEFAULT_CONTENT',
+                    subject: '$DEFAULT_SUBJECT',
+                    to: '$DEFAULT_RECIPIENTS',
+            )
 
              script {
                 sh '''
