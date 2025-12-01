@@ -179,7 +179,6 @@ pipeline {
                     -e EUREKA_INSTANCE=order-service-container \\
                     gab27x/order-service:dev
 
-                    until [ "$(curl -s http://localhost:8080/actuator/health | jq -r '.status')" = "UP" ]; do
                         echo "Waiting for API Gateway to be ready..."
                         sleep 10
                     done
