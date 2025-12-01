@@ -277,6 +277,23 @@ pipeline {
             }
         }
 
+
+        stage('Publish Locust Report') {
+            when { branch 'stage' }
+            steps {
+                echo '==> Publicando reporte de Locust en Jenkins'
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'tests/locust',        // ruta relativa al workspace
+                    reportFiles: 'locust-report.html',
+                    reportName: 'Locust Load Test Report',
+                    reportTitles: 'Load Test Results'
+                ])
+            }
+        }
+
         stage('OWASP ZAP Scan') {
             when { branch 'stage' }
             steps {
