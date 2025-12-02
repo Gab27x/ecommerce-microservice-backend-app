@@ -1,7 +1,7 @@
-# Release v1.1.0
-## Changes since v1.0.0
+# Release v2.0.0
+## Changes since v1.1.0
 
-### Chores / Misc
-- 4898a53 feat add notification (Gab27x)
-- b005fea fix: semantic version (Gab27x)
+### BREAKING CHANGES
+- 4dd01ac BREAKING CHANGE: testing (Gab27x)
+- 6050c70 BREAKING CHANGE: test (Gab27x)
 
