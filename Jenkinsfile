@@ -823,9 +823,7 @@ pipeline {
                     echo 'Staging deployment completed successfully!'
 
                 } else {
-                                    sh '''
-                docker rm -f $(docker ps -aq)
-                '''
+
                     echo 'Development tests completed successfully!'
                 }
 
