@@ -78,7 +78,49 @@ pipeline {
         }
 
 
+        stage('Jacoco'){
+            when { branch 'stage' }
+            steps{
 
+                sh '''
+                
+                    mvn clean verify
+                '''
+            }
+
+        }
+
+        stage('Publicar Reportes JaCoCo') {
+            when { branch 'stage' }
+            steps {
+                script {
+                    def SERVICES = [
+                        'api-gateway',
+                        'cloud-config',
+                        'favourite-service',
+                        'order-service',
+                        'payment-service',
+                        'product-service',
+                        'proxy-client',
+                        'service-discovery',
+                        'shipping-service',
+                        'user-service'
+                    ]
+
+                    SERVICES.each { svc ->
+                        publishHTML([
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: "${svc}/target/site/jacoco",
+                            reportFiles: "index.html",
+                            reportName: "JaCoCo - ${svc}",
+                            reportTitles: "JaCoCo Coverage Report (${svc})"
+                        ])
+                    }
+                }
+            }
+        }
 
 
 
@@ -247,6 +289,8 @@ pipeline {
                         sleep 10
                     done
 
+                    sleep 20
+
                     '''
                 }
             }
@@ -293,6 +337,25 @@ pipeline {
                 ])
             }
         }
+
+        stage('POSTMAN TESTS') {
+            when { branch 'stage' }
+
+            steps {
+                echo '=== Ejecutando pruebas Postman ==='
+                sh '''
+                    docker run --rm \
+                    --name postman-newman-runner \
+                    --network ecommerce-test \
+                    -v $(pwd):/etc/newman \
+                    postman/newman:latest run /etc/newman/postman_collection.json \
+                    --environment /etc/newman/variables_pipeline.json \
+                    --reporters cli,junit \
+                    --reporter-junit-export /etc/newman/newman-report.xml
+                '''
+            }
+        }
+
 
         stage('OWASP ZAP Scan') {
             when { branch 'stage' }
@@ -439,7 +502,7 @@ pipeline {
 
 
         stage('Upload Artifacts') {
-        when { branch 'master2' }
+        when { branch 'master' }
         steps {
             script {
                 def services = [
@@ -482,7 +545,7 @@ pipeline {
 
 
     stage('Configure kubeconfig') {
-            when { branch 'master2' }
+            when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
                     sh '''
@@ -500,7 +563,7 @@ pipeline {
         }
 
         stage('Create Namespace') {
-            when { branch 'master2' }
+            when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -521,7 +584,7 @@ pipeline {
 
 
         stage('Deploy common config for microservices') {
-            when { branch 'master2' }
+            when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -534,7 +597,7 @@ pipeline {
 
 
         stage('Deploy Core Services') {
-            when { branch 'master2' }
+            when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -558,7 +621,7 @@ pipeline {
         }
 
         stage('Deploy Ingress') {
-            when { branch 'master2' }
+            when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     sh '''
@@ -574,7 +637,7 @@ pipeline {
 
 
         stage('Deploy Microservices') {
-            when { branch 'master2' }
+            when { branch 'master' }
             steps {
                 withAWS(credentials: 'aws-cred', region: 'us-east-1') {
                     script {
