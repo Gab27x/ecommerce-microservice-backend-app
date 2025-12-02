@@ -1,7 +1,9 @@
-# Release v2.0.0
-## Changes since v1.1.0
+# Release v2.0.1
+## Changes since v2.0.0
 
-### BREAKING CHANGES
-- 4dd01ac BREAKING CHANGE: testing (Gab27x)
-- 6050c70 BREAKING CHANGE: test (Gab27x)
+### Chores / Misc
+- 9d19ecd fix: on succes for dev (Gab27x)
+- 7f3fefc Merge pull request #18 from Gab27x/stage (Gabriel Escobar)
+- 74793e3 Add sleep (Gab27x)
+- 46490b5 Add jacoco to pipe line (Gab27x)
 
