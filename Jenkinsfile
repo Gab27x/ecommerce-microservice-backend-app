@@ -289,6 +289,8 @@ pipeline {
                         sleep 10
                     done
 
+                    sleep 20
+
                     '''
                 }
             }
